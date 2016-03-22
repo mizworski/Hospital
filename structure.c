@@ -1,7 +1,3 @@
-//
-// Created by michal on 19.03.16.
-//
-
 typedef struct patient patient;
 
 typedef struct diseaseObject diseaseObject;
