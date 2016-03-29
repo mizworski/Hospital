@@ -1,9 +1,14 @@
+#include <stdio.h>
+#include <string.h>
+
+typedef struct hospitalData hospitalData;
 typedef struct patient patient;
 typedef struct diseaseObject diseaseObject;
 typedef struct diseaseListNode diseaseListNode;
 
-struct patientsList {
-
+struct hospitalData {
+    patient *firstPatient;
+    diseaseListNode *firstDisease;
 };
 
 struct diseaseListNode {
@@ -24,9 +29,23 @@ struct diseaseObject {
     int referenceCount;
 };
 
-void addNewPatientToList(char *patientName,
-                         char *diseaseName,
-                         char *diseaseDescription) {
+hospitalData hospitalGlobalData;
+
+void initializeHospitalGlobalData(void) {
+    hospitalGlobalData.firstPatient = NULL;
+    hospitalGlobalData.firstDisease = NULL;
+}
+
+void addNewPatient(char *patientName) {
+    patient nextPatient = hospitalGlobalData.firstPatient;
+
+    while (nextPatient != NULL &&
+            strcmp(nextPatient.patientName, patientName) < 0);
+}
+
+void addNewDisease(char *patientName,
+                   char *diseaseName,
+                   char *diseaseDescription) {
 
 }
 

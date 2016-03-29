@@ -1,13 +1,19 @@
 #include <stdio.h>
 
-void readUntilEOF (void) {
+int readSingleLineAndReturnOperationCode (int *integerArgument,
+                                          char **stringArgument1,
+                                          char **stringArgument2,
+                                          char **stringArgument3) {
     char *line = NULL;
-    int lineLength;
-    while (read = getline(&line, &lineLength, stdin)) {
-        printf("chuj");
-    }
-}
+    int operationCode = -1;
+    size_t bufferSize = 0;
+    ssize_t lineLength;
 
-void readSingleLine (char **) {
-    ;
+    lineLength = getline(&line, &bufferSize, stdin);
+
+    if (lineLength != -1) {
+        
+    }
+
+    return operationCode;
 }
