@@ -61,13 +61,16 @@ void addNewDisease(char *patientName,
     patient *currentPatient = hospitalGlobalData.firstPatient;
 
     // Insert patient into descending list sorted by patientName field.
+
+    // Find patient in patientList that's
+    // patientName field proceeds argument patientName.
     while (currentPatient->nextPatient != NULL &&
            strcmp(currentPatient->patientName, patientName) > 0) {
         currentPatient = currentPatient->nextPatient;
     }
 
     // Checks whether patient with patientName value exists in hospitalData
-    // if not, allocates memory for new patient and initializes its structure.
+    // if not, allocates memory for new patient and initializes it's structure.
     if (strcmp(currentPatient->patientName, patientName) < 0) {
         patient *newPatient = malloc(sizeof(patient));
 
@@ -78,6 +81,10 @@ void addNewDisease(char *patientName,
         newPatient->nextPatient = currentPatient->nextPatient;
         currentPatient->nextPatient = newPatient;
     }
+
+    currentPatient = currentPatient->nextPatient;
+
+    // Adds new disease to patient diseaseList.
 
 }
 
