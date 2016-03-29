@@ -20,6 +20,7 @@ int main (void) {
 
     } while (operationCode != -1);
 
+    clearAllocatedMemory();
 
     return 0;
 }

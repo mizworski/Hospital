@@ -5,6 +5,8 @@
 
 void initializeHospitalGlobalData(void);
 
+void clearAllocatedMemory(void);
+
 void addNewPatient(char *patientName);
 
 void addNewDisease(char *patientName,
