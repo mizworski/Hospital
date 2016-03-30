@@ -21,7 +21,7 @@ struct diseaseObject {
 
 struct diseaseListNode {
     diseaseListNode *nextDisease;
-    diseaseReference *diseaseReference;
+    struct diseaseObject *diseaseReference; // Something is wrong with typedef.
 };
 
 struct patient {
@@ -44,6 +44,125 @@ void clearAllocatedMemory(void) {
 
 }
 
+patient* findPatientPrecedingGivenName(char *patientName) {
+    patient *currentPatient = hospitalGlobalData.firstPatient;
+
+    // Insert patient into descending list sorted by patientName field.
+
+    // Find patient in patientList that's
+    // patientName field proceeds argument patientName.
+    while (currentPatient->nextPatient != NULL &&
+           strcmp(currentPatient->patientName, patientName) > 0) {
+        currentPatient = currentPatient->nextPatient;
+    }
+
+    return currentPatient;
+}
+
+patient* getPatientPointer(char *patientName,
+                           patient *currentPatient) {
+    if (strcmp(currentPatient->patientName, patientName) < 0) {
+        patient *newPatient = malloc(sizeof(patient));
+
+        newPatient->patientName = patientName;
+        newPatient->diseaseList = malloc(sizeof(diseaseListNode));
+        newPatient->nextPatient = NULL;
+        newPatient->diseaseCount = 0;
+        newPatient->nextPatient = currentPatient->nextPatient;
+        currentPatient->nextPatient = newPatient;
+    }
+
+    return currentPatient->nextPatient;
+}
+
+diseaseListNode* findDiseasePrecedingGivenDisease(char *diseaseName,
+                                                  diseaseListNode
+                                                  *diseaseList) {
+    diseaseListNode *currentDisease = diseaseList;
+
+    // Finds disease in diseaseList that's
+    // diseaseName field proceeds argument diseaseName.
+    while (currentDisease->nextDisease != NULL &&
+           strcmp(currentDisease->nextDisease->diseaseReference->diseaseName,
+                  diseaseName) > 0) {
+        currentDisease = currentDisease->nextDisease;
+    }
+
+    return currentDisease;
+}
+
+void createDiseaseRegistry(patient* currentPatient,
+                           diseaseListNode* precedingDisease,
+                           char *diseaseName,
+                           char *diseaseDescription) {
+    // Allocates memory for diseaseListNode and diseaseReference.
+    diseaseListNode *newDiseaseNode = malloc(sizeof(diseaseListNode));
+    diseaseReference *newDisease = malloc(sizeof(diseaseReference));
+
+    // Initializes diseaseListNode with arguments passed to the function.
+    newDiseaseNode->nextDisease = precedingDisease->nextDisease;
+    precedingDisease->nextDisease = newDiseaseNode;
+    newDiseaseNode->diseaseReference = newDisease;
+
+    // Initializes diseaseReference with arguments passed to the function.
+    newDisease->diseaseName = diseaseName;
+    newDisease->diseaseDescription = diseaseDescription;
+    newDisease->referenceCount = 1;
+
+    // Updates currentPatient and global hospitalGlobalData structures.
+    currentPatient->diseaseCount += 1;
+    hospitalGlobalData.storedDiseasesCount += 1;
+}
+
+void addNewDisease(char *patientName,
+                   char *diseaseName,
+                   char *diseaseDescription) {
+    // Finds patient with patientName preceding patientName given as argument.
+    patient *precedingPatient = findPatientPrecedingGivenName(patientName);
+
+    // Gets pointer to patient with patientName same as given argument
+    // (allocates and initializes new structure if patient doesn't exists).
+    precedingPatient = getPatientPointer(patientName, precedingPatient);
+
+    // Finds disease with diseaseName preceding diseaseName given as argument.
+    diseaseListNode *precedingDisease =
+            findDiseasePrecedingGivenDisease(diseaseName,
+                                             precedingPatient->diseaseList);
+
+    // Allocates and initializes new structure for disease.
+    createDiseaseRegistry(precedingPatient,
+                          precedingDisease,
+                          diseaseName,
+                          diseaseDescription);
+}
+
+void copyLatestDisease(char *toPatientName,
+                       char *fromPatientName) {
+    // I assume that if
+}
+
+void changePatientDiseaseDescription(char *patientName,
+                                     int diseaseID,
+                                     char *diseaseName,
+                                     char *diseaseDescription) {
+
+}
+
+void printDiseaseDescription(char *patientName,
+                              int diseaseID) {
+
+}
+
+void printIgnoredUponFailure(void) {
+    printf("IGNORED");
+}
+
+void deletePatientDiseaseData(char *patientName) {
+
+}
+
+// TRASH
+
 /*
 
 void addNewPatient(char *patientName) {
@@ -60,6 +179,7 @@ void addNewPatient(char *patientName) {
 }
 */
 
+/*
 void addNewDisease(char *patientName,
                    char *diseaseName,
                    char *diseaseDescription) {
@@ -108,66 +228,10 @@ void addNewDisease(char *patientName,
     newDisease->diseaseName = diseaseName;
     newDisease->diseaseDescription = diseaseDescription;
     newDisease->referenceCount = 1;
+    // MISSING INSERTION
 
     // Updates currentPatient and global hospitalGlobalData structures.
     currentPatient->diseaseCount += 1;
     hospitalGlobalData.storedDiseasesCount += 1;
 }
-
-void copyLatestDisease(char *fromPatientName,
-                       char *toPatientName) {
-    // I assume that if
-}
-
-void changePatientDiseaseDescription(char *patientName,
-                                     int diseaseID,
-                                     char *diseaseName,
-                                     char *diseaseDescription) {
-
-}
-
-void printDiseaseDescription(char *patientName,
-                              int diseaseID) {
-
-}
-
-void printIgnoredUponFailure(void) {
-    printf("IGNORED");
-}
-
-void deletePatientDiseaseData(char *patientName) {
-
-}
-
-patient* findPatientPreceedingGivenName(char *patientName) {
-    patient *currentPatient = hospitalGlobalData.firstPatient;
-
-    // Insert patient into descending list sorted by patientName field.
-
-    // Find patient in patientList that's
-    // patientName field proceeds argument patientName.
-    while (currentPatient->nextPatient != NULL &&
-           strcmp(currentPatient->patientName, patientName) > 0) {
-        currentPatient = currentPatient->nextPatient;
-    }
-
-    return currentPatient;
-}
-
-/*diseaseListNode* findDiseasePreceedingGivenDisease(char *diseaseName,
-                                                   diseaseListNode* diseaseListNode) {
-    diseaseListNode *currentDisease = currentPatient->diseaseList;
-
-    // Finds disease in diseaseList that's
-    // diseaseName field proceeds argument diseaseName.
-    while (currentDisease->nextDisease != NULL &&
-           strcmp(currentDisease->nextDisease->diseaseReference->diseaseName,
-                  diseaseName) > 0) {
-        currentDisease = currentDisease->nextDisease;
-    }
-}*/
-
-diseaseListNode* findDiseasePreceedingGivenDisease(char *diseaseName,
-                                                  diseaseListNode diseaseList) {
-
-}
+*/
