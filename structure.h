@@ -62,4 +62,9 @@ void printDiseaseDescription (char *patientName,
 
 void deletePatientDiseaseData (char *patientName);
 
+void performOperation(int operationCode,
+                      int *integerArgument,
+                      char **stringArgument1,
+                      char **stringArgument2,
+                      char **stringArgument3);
 

@@ -162,6 +162,42 @@ void deletePatientDiseaseData(char *patientName) {
 
 }
 
+void performOperation(int operationCode,
+                      int *integerArgument,
+                      char **stringArgument1,
+                      char **stringArgument2,
+                      char **stringArgument3) {
+    switch (operationCode) {
+        case -1:
+        case 0:
+            break;
+        case 1:
+            addNewDisease(*stringArgument1,
+                          *stringArgument2,
+                          *stringArgument3);
+            break;
+        case 2:
+            copyLatestDisease(*stringArgument1,
+                              *stringArgument2);
+            break;
+        case 3:
+            changePatientDiseaseDescription(*stringArgument1,
+                                            *integerArgument,
+                                            *stringArgument2,
+                                            *stringArgument3);
+            break;
+        case 4:
+            printDiseaseDescription(*stringArgument1,
+                                    *integerArgument);
+            break;
+        case 5:
+            deletePatientDiseaseData(*stringArgument1);
+            break;
+        default: // There is no default.
+            break;
+    }
+}
+
 // TRASH
 
 /*
