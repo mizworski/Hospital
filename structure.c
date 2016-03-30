@@ -155,7 +155,7 @@ void printDiseaseDescription(char *patientName,
 }
 
 void printIgnoredUponFailure(void) {
-    printf("IGNORED");
+    printf("IGNORED\n");
 }
 
 void deletePatientDiseaseData(char *patientName) {
@@ -169,8 +169,6 @@ void performOperation(int operationCode,
                       char **stringArgument3) {
     switch (operationCode) {
         case -1:
-            break;
-
             break;
         case 1:
             addNewDisease(*stringArgument1,

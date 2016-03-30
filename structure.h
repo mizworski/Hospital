@@ -43,8 +43,6 @@ void createDiseaseRegistry(patient* currentPatient,
                            char *diseaseName,
                            char *diseaseDescription);
 
-void addNewPatient(char *patientName);
-
 void addNewDisease(char *patientName,
                    char *diseaseName,
                    char *diseaseDescription);

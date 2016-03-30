@@ -40,16 +40,17 @@ int readSingleLineAndReturnOperationCode (int *integerArgument,
             stringTokens[i++] = strtok(NULL, DELIMITERS);
         }
 
-        if (strcmp(stringTokens[0], "NEW_DISEASE_ENTER_DESCRIPTION")) {
+        if ((strcmp(stringTokens[0], "NEW_DISEASE_ENTER_DESCRIPTION")) == 0) {
             operationCode = NEW_DISEASE_ENTER_DESCRIPTION;
             stringArgument1 = &stringTokens[1];
             stringArgument2 = &stringTokens[2];
             stringArgument3 = &stringTokens[3];
-        } else if (strcmp(stringTokens[0], "NEW_DISEASE_COPY_DESCRIPTION")) {
+        } else if ((strcmp(stringTokens[0], "NEW_DISEASE_COPY_DESCRIPTION"))
+                   == 0) { // where to break?
             operationCode = NEW_DISEASE_COPY_DESCRIPTION;
             stringArgument1 = &stringTokens[1];
             stringArgument2 = &stringTokens[2];
-        } else if (strcmp(stringTokens[0], "CHANGE_DESCRIPTION")) {
+        } else if ((strcmp(stringTokens[0], "CHANGE_DESCRIPTION")) == 0) {
             operationCode = CHANGE_DESCRIPTION;
             *integerArgument = (int) strtol(INTEGER_ARGUMENT_POSITION,
                                             &ptr,
@@ -57,13 +58,13 @@ int readSingleLineAndReturnOperationCode (int *integerArgument,
             stringArgument1 = &stringTokens[1];
             stringArgument2 = &stringTokens[3];
             stringArgument3 = &stringTokens[4];
-        } else if (strcmp(stringTokens[0], "PRINT_DESCRIPTION")) {
+        } else if ((strcmp(stringTokens[0], "PRINT_DESCRIPTION")) == 0) {
             operationCode = PRINT_DESCRIPTION;
             *integerArgument = (int) strtol(INTEGER_ARGUMENT_POSITION,
                                             &ptr,
                                             INTEGER_FROM_STRING_BASE);
             stringArgument1 = &stringTokens[1];
-        } else if (strcmp(stringTokens[0], "DELETE_PATIENT_DATA")) {
+        } else if ((strcmp(stringTokens[0], "DELETE_PATIENT_DATA")) == 0) {
             operationCode = DELETE_PATIENT_DATA;
             stringArgument1 = &stringTokens[1];
         } else {
