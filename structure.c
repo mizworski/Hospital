@@ -4,13 +4,19 @@
 
 typedef struct hospitalData hospitalData;
 typedef struct patient patient;
-typedef struct diseaseReference diseaseReference;
+typedef struct diseaseObject diseaseReference;
 typedef struct diseaseListNode diseaseListNode;
 
 struct hospitalData {
     patient *firstPatient;
 //    diseaseListNode *firstDisease;
     int storedDiseasesCount;
+};
+
+struct diseaseObject {
+    char *diseaseName;
+    char *diseaseDescription;
+    int referenceCount;
 };
 
 struct diseaseListNode {
@@ -23,12 +29,6 @@ struct patient {
     diseaseListNode *diseaseList;
     patient *nextPatient;
     int diseaseCount;
-};
-
-struct diseaseReference {
-    char *diseaseName;
-    char *diseaseDescription;
-    int referenceCount;
 };
 
 hospitalData hospitalGlobalData;
@@ -116,7 +116,7 @@ void addNewDisease(char *patientName,
 
 void copyLatestDisease(char *fromPatientName,
                        char *toPatientName) {
-
+    // I assume that if
 }
 
 void changePatientDiseaseDescription(char *patientName,
@@ -126,11 +126,48 @@ void changePatientDiseaseDescription(char *patientName,
 
 }
 
-void printDiseaseDescription (char *patientName,
+void printDiseaseDescription(char *patientName,
                               int diseaseID) {
 
 }
 
-void deletePatientDiseaseData (char *patientName) {
+void printIgnoredUponFailure(void) {
+    printf("IGNORED");
+}
+
+void deletePatientDiseaseData(char *patientName) {
+
+}
+
+patient* findPatientPreceedingGivenName(char *patientName) {
+    patient *currentPatient = hospitalGlobalData.firstPatient;
+
+    // Insert patient into descending list sorted by patientName field.
+
+    // Find patient in patientList that's
+    // patientName field proceeds argument patientName.
+    while (currentPatient->nextPatient != NULL &&
+           strcmp(currentPatient->patientName, patientName) > 0) {
+        currentPatient = currentPatient->nextPatient;
+    }
+
+    return currentPatient;
+}
+
+/*diseaseListNode* findDiseasePreceedingGivenDisease(char *diseaseName,
+                                                   diseaseListNode* diseaseListNode) {
+    diseaseListNode *currentDisease = currentPatient->diseaseList;
+
+    // Finds disease in diseaseList that's
+    // diseaseName field proceeds argument diseaseName.
+    while (currentDisease->nextDisease != NULL &&
+           strcmp(currentDisease->nextDisease->diseaseReference->diseaseName,
+                  diseaseName) > 0) {
+        currentDisease = currentDisease->nextDisease;
+    }
+}*/
+
+diseaseListNode* findDiseasePreceedingGivenDisease(char *diseaseName,
+                                                  diseaseListNode diseaseList) {
 
 }
