@@ -9,7 +9,6 @@ int main (void) {
     char *stringArgument2;
     char *stringArgument3;
 
-    printf("projekt");
     initializeHospitalGlobalData();
 
     do {

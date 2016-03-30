@@ -42,7 +42,7 @@ int getOperationCode(char *operationString, size_t *charsShiftInString) {
 
 char* getSingleArgumentFromString(char **bufferedString) {
     int charCount = 0;
-    char* argumentFromString = NULL;
+    char *argumentFromString = NULL;
     while (*bufferedString[charCount] != ' ' &&
            *bufferedString[charCount] != '\n') {
         charCount++;
@@ -58,7 +58,7 @@ char* getSingleArgumentFromString(char **bufferedString) {
 
 // TODO remove \n from the end of the string.
 
-void getArgumentsFromString(char *bufferedString,
+void getArgumentsFromString(char **bufferedString,
                             int operationCode,
                             int *integerArgument,
                             char **stringArgument1,
@@ -67,31 +67,31 @@ void getArgumentsFromString(char *bufferedString,
     char **dummyPointer = NULL;
     switch (operationCode) {
         case NEW_DISEASE_ENTER_DESCRIPTION:
-            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument3 = bufferedString;
+            *stringArgument1 = getSingleArgumentFromString(bufferedString);
+            *stringArgument2 = getSingleArgumentFromString(bufferedString);
+            *stringArgument3 = *bufferedString;
             break;
         case NEW_DISEASE_COPY_DESCRIPTION:
-            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument2 = bufferedString;
+            *stringArgument1 = getSingleArgumentFromString(bufferedString);
+            *stringArgument2 = *bufferedString;
             break;
         case CHANGE_DESCRIPTION:
-            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument1 = getSingleArgumentFromString(bufferedString);
             *integerArgument =
-                    (int) strtol(getSingleArgumentFromString(&bufferedString),
+                    (int) strtol(getSingleArgumentFromString(bufferedString),
                            dummyPointer,
                            INTEGER_FROM_STRING_BASE);
-            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument3 = bufferedString;
+            *stringArgument2 = getSingleArgumentFromString(bufferedString);
+            *stringArgument3 = *bufferedString;
             break;
         case PRINT_DESCRIPTION:
-            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *integerArgument = (int) strtol(bufferedString,
+            *stringArgument1 = getSingleArgumentFromString(bufferedString);
+            *integerArgument = (int) strtol(*bufferedString,
                                             dummyPointer,
                                             INTEGER_FROM_STRING_BASE);
             break;
         case DELETE_PATIENT_DATA:
-            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument1 = getSingleArgumentFromString(bufferedString);
             break;
         case WRONG_INPUT:
             break;
@@ -105,7 +105,8 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
                                          char **stringArgument2,
                                          char **stringArgument3) {
     char *lineReadFromStdin = NULL;
-    char bufferedString[MAX_LINE_SIZE];
+    char *bufferedString = malloc(MAX_LINE_SIZE * sizeof(char));
+    char *pointerToFree = bufferedString;
     int operationCode;
     size_t bufferSize = DEFAULT_BUFFER_SIZE; // Dummy.
     ssize_t lineLength;
@@ -121,13 +122,15 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
 
         strcpy(bufferedString, lineReadFromStdin + charsShiftInString);
 
-        getArgumentsFromString(bufferedString,
+        getArgumentsFromString(&bufferedString,
                                operationCode,
                                integerArgument,
                                stringArgument1,
                                stringArgument2,
                                stringArgument3);
     }
+
+    free(pointerToFree);
 
     return operationCode;
 }
