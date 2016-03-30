@@ -60,6 +60,8 @@ void changePatientDiseaseDescription(char *patientName,
 void printDiseaseDescription (char *patientName,
                               int diseaseID);
 
+void printIgnoredUponFailure(void);
+
 void deletePatientDiseaseData (char *patientName);
 
 void performOperation(int operationCode,

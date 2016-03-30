@@ -169,7 +169,8 @@ void performOperation(int operationCode,
                       char **stringArgument3) {
     switch (operationCode) {
         case -1:
-        case 0:
+            break;
+
             break;
         case 1:
             addNewDisease(*stringArgument1,
@@ -193,7 +194,9 @@ void performOperation(int operationCode,
         case 5:
             deletePatientDiseaseData(*stringArgument1);
             break;
-        default: // There is no default.
+        case 0:
+        default:
+            printIgnoredUponFailure();// There is no default.
             break;
     }
 }
