@@ -9,6 +9,7 @@
 #define CHANGE_DESCRIPTION 3
 #define PRINT_DESCRIPTION 4
 #define DELETE_PATIENT_DATA 5
+#define MAX_LINE_SIZE 100000
 #define MAX_ARGUMENT_QUANTITY 5
 #define DELIMITERS " "
 #define DEFAULT_BUFFER_SIZE 0
@@ -18,28 +19,86 @@
 // Z tymi definami jest problem, bo jak daje liczbe jako input, to nie wywala
 // bledu. albo i nie, bo z normalnym inputem tez jest lipa.
 
-int readSingleLineAndReturnOperationCode (int *integerArgument,
-                                          char **stringArgument1,
-                                          char **stringArgument2,
-                                          char **stringArgument3) {
+int getOperationCode(char *operationString, size_t *charsShiftInString) {
+    int operationCode;
+    int charCount = 0;
+
+    while (operationString[charCount] != ' ' && operationString[charCount] != '\n') {
+        charCount++;
+    }
+
+    *charsShiftInString = (size_t) charCount;
+
+    if ((strncmp(operationString, "NEW_DISEASE_ENTER_DESCRIPTION", *charsShiftInString) == 0)) {
+        operationCode = NEW_DISEASE_ENTER_DESCRIPTION;
+    } else if ((strncmp(operationString, "NEW_DISEASE_COPY_DESCRIPTION", *charsShiftInString)) == 0) {
+        operationCode = NEW_DISEASE_COPY_DESCRIPTION;
+    } else if ((strncmp(operationString, "CHANGE_DESCRIPTION", *charsShiftInString)) == 0) {
+        operationCode = CHANGE_DESCRIPTION;
+    } else if ((strncmp(operationString, "PRINT_DESCRIPTION", *charsShiftInString)) == 0) {
+        operationCode = PRINT_DESCRIPTION;
+    } else if ((strncmp(operationString, "DELETE_PATIENT_DATA", *charsShiftInString)) == 0) {
+        operationCode = DELETE_PATIENT_DATA;
+    } else {
+        operationCode = WRONG_INPUT;
+    }
+
+    return operationCode;
+}
+
+void getArgumentsFromString(char *bufferedString,
+                            int operationCode,
+                            int *integerArgument,
+                            char **stringArgument1,
+                            char **stringArgument2,
+                            char **stringArgument3) {
+    switch (operationCode) {
+        case NEW_DISEASE_ENTER_DESCRIPTION:
+            break;
+        case NEW_DISEASE_COPY_DESCRIPTION:
+            break;
+        case CHANGE_DESCRIPTION:
+            break;
+        case PRINT_DESCRIPTION:
+            break;
+        case DELETE_PATIENT_DATA:
+            break;
+        case WRONG_INPUT:
+            break;
+        default: // There is no default.
+            break;
+    }
+}
+
+int readSingleLineAndReturnOperationCode(int *integerArgument,
+                                         char **stringArgument1,
+                                         char **stringArgument2,
+                                         char **stringArgument3) {
     char *lineReadFromStdin = NULL;
-    char *stringTokens[MAX_ARGUMENT_QUANTITY];
-    char *ptr; // Useless dummy.
-    int operationCode = LINE_WAS_NOT_READ;
+    char bufferedString[MAX_LINE_SIZE];
+    int operationCode;
     size_t bufferSize = DEFAULT_BUFFER_SIZE; // Dummy.
     ssize_t lineLength;
 
     lineLength = getline(&lineReadFromStdin, &bufferSize, stdin);
 
-    if (lineLength != LINE_WAS_NOT_READ) {
-        int i = 1;
+    if (lineLength == LINE_WAS_NOT_READ) {
+        operationCode = LINE_WAS_NOT_READ;
+    } else {
+        size_t charsShiftInString;
 
-        stringTokens[0] = strtok(lineReadFromStdin, DELIMITERS);
-        while (i < MAX_ARGUMENT_QUANTITY && stringTokens[i] != NULL) // Lazy evaluation.
-        {
-            stringTokens[i++] = strtok(NULL, DELIMITERS);
-        }
+        operationCode = getOperationCode(lineReadFromStdin, &charsShiftInString);
 
+        strcpy(bufferedString, lineReadFromStdin + charsShiftInString);
+
+        getArgumentsFromString(bufferedString,
+                               operationCode,
+                               integerArgument,
+                               stringArgument1,
+                               stringArgument2,
+                               stringArgument3);
+    }
+        /*
         if ((strcmp(stringTokens[0], "NEW_DISEASE_ENTER_DESCRIPTION")) == 0) {
             operationCode = NEW_DISEASE_ENTER_DESCRIPTION;
             stringArgument1 = &stringTokens[1];
@@ -69,8 +128,7 @@ int readSingleLineAndReturnOperationCode (int *integerArgument,
             stringArgument1 = &stringTokens[1];
         } else {
             operationCode = WRONG_INPUT;
-        }
-    }
+        }*/
 
     return operationCode;
 }

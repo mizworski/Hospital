@@ -52,7 +52,7 @@ patient* findPatientPrecedingGivenName(char *patientName) {
     // Find patient in patientList that's
     // patientName field proceeds argument patientName.
     while (currentPatient->nextPatient != NULL &&
-           strcmp(currentPatient->patientName, patientName) > 0) {
+           strcmp(currentPatient->nextPatient->patientName, patientName) > 0) {
         // Lazy evaluation.
         currentPatient = currentPatient->nextPatient;
     }
@@ -62,7 +62,8 @@ patient* findPatientPrecedingGivenName(char *patientName) {
 
 patient* getPatientPointer(char *patientName,
                            patient *currentPatient) {
-    if (strcmp(currentPatient->patientName, patientName) < 0) {
+    if (currentPatient->nextPatient == NULL || // Lazy evaluation.
+            strcmp(currentPatient->patientName, patientName) < 0) {
         patient *newPatient = malloc(sizeof(patient));
 
         newPatient->patientName = patientName;
