@@ -53,6 +53,7 @@ patient* findPatientPrecedingGivenName(char *patientName) {
     // patientName field proceeds argument patientName.
     while (currentPatient->nextPatient != NULL &&
            strcmp(currentPatient->patientName, patientName) > 0) {
+        // Lazy evaluation.
         currentPatient = currentPatient->nextPatient;
     }
 
@@ -84,7 +85,7 @@ diseaseListNode* findDiseasePrecedingGivenDisease(char *diseaseName,
     // diseaseName field proceeds argument diseaseName.
     while (currentDisease->nextDisease != NULL &&
            strcmp(currentDisease->nextDisease->diseaseReference->diseaseName,
-                  diseaseName) > 0) {
+                  diseaseName) > 0) { // Lazy evaluation.
         currentDisease = currentDisease->nextDisease;
     }
 
