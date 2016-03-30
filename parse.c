@@ -10,14 +10,8 @@
 #define PRINT_DESCRIPTION 4
 #define DELETE_PATIENT_DATA 5
 #define MAX_LINE_SIZE 100000
-#define MAX_ARGUMENT_QUANTITY 5
-#define DELIMITERS " "
 #define DEFAULT_BUFFER_SIZE 0
 #define INTEGER_FROM_STRING_BASE 10
-#define INTEGER_ARGUMENT_POSITION stringTokens[2]
-
-// Z tymi definami jest problem, bo jak daje liczbe jako input, to nie wywala
-// bledu. albo i nie, bo z normalnym inputem tez jest lipa.
 
 int getOperationCode(char *operationString, size_t *charsShiftInString) {
     int operationCode;
@@ -46,22 +40,58 @@ int getOperationCode(char *operationString, size_t *charsShiftInString) {
     return operationCode;
 }
 
+char* getSingleArgumentFromString(char **bufferedString) {
+    int charCount = 0;
+    char* argumentFromString = NULL;
+    while (*bufferedString[charCount] != ' ' &&
+           *bufferedString[charCount] != '\n') {
+        charCount++;
+    }
+
+    strncpy(*bufferedString, argumentFromString, (size_t) charCount);
+
+    // Adds one to skip whitespace.
+    *bufferedString += charCount + 1;
+
+    return argumentFromString;
+}
+
+// TODO remove \n from the end of the string.
+
 void getArgumentsFromString(char *bufferedString,
                             int operationCode,
                             int *integerArgument,
                             char **stringArgument1,
                             char **stringArgument2,
                             char **stringArgument3) {
+    char **dummyPointer = NULL;
     switch (operationCode) {
         case NEW_DISEASE_ENTER_DESCRIPTION:
+            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument3 = bufferedString;
             break;
         case NEW_DISEASE_COPY_DESCRIPTION:
+            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument2 = bufferedString;
             break;
         case CHANGE_DESCRIPTION:
+            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            *integerArgument =
+                    (int) strtol(getSingleArgumentFromString(&bufferedString),
+                           dummyPointer,
+                           INTEGER_FROM_STRING_BASE);
+            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument3 = bufferedString;
             break;
         case PRINT_DESCRIPTION:
+            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            *integerArgument = (int) strtol(bufferedString,
+                                            dummyPointer,
+                                            INTEGER_FROM_STRING_BASE);
             break;
         case DELETE_PATIENT_DATA:
+            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
             break;
         case WRONG_INPUT:
             break;
@@ -98,37 +128,6 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
                                stringArgument2,
                                stringArgument3);
     }
-        /*
-        if ((strcmp(stringTokens[0], "NEW_DISEASE_ENTER_DESCRIPTION")) == 0) {
-            operationCode = NEW_DISEASE_ENTER_DESCRIPTION;
-            stringArgument1 = &stringTokens[1];
-            stringArgument2 = &stringTokens[2];
-            stringArgument3 = &stringTokens[3];
-        } else if ((strcmp(stringTokens[0], "NEW_DISEASE_COPY_DESCRIPTION"))
-                   == 0) { // where to break?
-            operationCode = NEW_DISEASE_COPY_DESCRIPTION;
-            stringArgument1 = &stringTokens[1];
-            stringArgument2 = &stringTokens[2];
-        } else if ((strcmp(stringTokens[0], "CHANGE_DESCRIPTION")) == 0) {
-            operationCode = CHANGE_DESCRIPTION;
-            *integerArgument = (int) strtol(INTEGER_ARGUMENT_POSITION,
-                                            &ptr,
-                                            INTEGER_FROM_STRING_BASE);
-            stringArgument1 = &stringTokens[1];
-            stringArgument2 = &stringTokens[3];
-            stringArgument3 = &stringTokens[4];
-        } else if ((strcmp(stringTokens[0], "PRINT_DESCRIPTION")) == 0) {
-            operationCode = PRINT_DESCRIPTION;
-            *integerArgument = (int) strtol(INTEGER_ARGUMENT_POSITION,
-                                            &ptr,
-                                            INTEGER_FROM_STRING_BASE);
-            stringArgument1 = &stringTokens[1];
-        } else if ((strcmp(stringTokens[0], "DELETE_PATIENT_DATA")) == 0) {
-            operationCode = DELETE_PATIENT_DATA;
-            stringArgument1 = &stringTokens[1];
-        } else {
-            operationCode = WRONG_INPUT;
-        }*/
 
     return operationCode;
 }
