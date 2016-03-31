@@ -4,16 +4,15 @@
 
 typedef struct hospitalData hospitalData;
 typedef struct patient patient;
-typedef struct diseaseObject diseaseReference;
+typedef struct diseaseStructure diseaseStructure;
 typedef struct diseaseListNode diseaseListNode;
 
 struct hospitalData {
     patient *firstPatient;
-//    diseaseListNode *firstDisease;
     int storedDiseasesCount;
 };
 
-struct diseaseObject {
+struct diseaseStructure {
     char *diseaseName;
     char *diseaseDescription;
     int referenceCount;
@@ -21,7 +20,7 @@ struct diseaseObject {
 
 struct diseaseListNode {
     diseaseListNode *nextDisease;
-    struct diseaseObject *diseaseReference; // Something is wrong with typedef.
+    diseaseStructure *diseaseReference;
 };
 
 struct patient {
@@ -31,17 +30,48 @@ struct patient {
     int diseaseCount;
 };
 
-hospitalData hospitalGlobalData;
+static hospitalData hospitalGlobalData;
 
 void initializeHospitalGlobalData(void) {
     // Initialize global structure with dummy ahead list.
     hospitalGlobalData.firstPatient = malloc(sizeof(patient));
-//    hospitalGlobalData.firstDisease = malloc(sizeof(diseaseListNode));
     hospitalGlobalData.storedDiseasesCount = 0;
 }
 
-void clearAllocatedMemory(void) {
+void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference) {
+    diseaseReference->referenceCount--;
 
+    if(diseaseReference->referenceCount == 0) {
+        free(diseaseReference->diseaseName);
+        free(diseaseReference->diseaseDescription);
+    }
+    free(diseaseReference);
+}
+
+void clearPatientData(patient *patientBeingRemoved) {
+    // Frees list of patient's diseases.
+    diseaseListNode *diseaseBeingRemoved = patientBeingRemoved->diseaseList;
+    diseaseListNode *temporaryDisease;
+    while (diseaseBeingRemoved != NULL) {
+        temporaryDisease = diseaseBeingRemoved;
+        decreaseCountAndFreeIfNotReferenced(diseaseBeingRemoved->diseaseReference);
+        diseaseBeingRemoved = diseaseBeingRemoved->nextDisease;
+        free(temporaryDisease);
+    }
+
+    free(patientBeingRemoved->patientName);
+    free(patientBeingRemoved);
+}
+
+void clearAllocatedMemory(void) {
+    // Frees list of patients from global structure.
+    patient *patientBeingRemoved = hospitalGlobalData.firstPatient;
+    patient *temporaryPatient;
+    while (patientBeingRemoved != NULL) {
+        temporaryPatient = patientBeingRemoved;
+        patientBeingRemoved = patientBeingRemoved->nextPatient;
+        clearPatientData(temporaryPatient);
+    }
 }
 
 patient* findPatientPrecedingGivenName(char *patientName) {
@@ -67,6 +97,7 @@ patient* getPatientPointer(char *patientName,
         patient *newPatient = malloc(sizeof(patient));
 
         newPatient->patientName = patientName;
+        // Initializes dummy ahead diseaseList.
         newPatient->diseaseList = malloc(sizeof(diseaseListNode));
         newPatient->nextPatient = NULL;
         newPatient->diseaseCount = 0;
@@ -97,16 +128,16 @@ void createDiseaseRegistry(patient* currentPatient,
                            diseaseListNode* precedingDisease,
                            char *diseaseName,
                            char *diseaseDescription) {
-    // Allocates memory for diseaseListNode and diseaseReference.
+    // Allocates memory for diseaseListNode and diseaseStructure.
     diseaseListNode *newDiseaseNode = malloc(sizeof(diseaseListNode));
-    diseaseReference *newDisease = malloc(sizeof(diseaseReference));
+    diseaseStructure *newDisease = malloc(sizeof(diseaseStructure));
 
     // Initializes diseaseListNode with arguments passed to the function.
     newDiseaseNode->nextDisease = precedingDisease->nextDisease;
     precedingDisease->nextDisease = newDiseaseNode;
     newDiseaseNode->diseaseReference = newDisease;
 
-    // Initializes diseaseReference with arguments passed to the function.
+    // Initializes diseaseStructure with arguments passed to the function.
     newDisease->diseaseName = diseaseName;
     newDisease->diseaseDescription = diseaseDescription;
     newDisease->referenceCount = 1;
@@ -199,78 +230,3 @@ void performOperation(int operationCode,
             break;
     }
 }
-
-// TRASH
-
-/*
-
-void addNewPatient(char *patientName) {
-    patient *newPatient = malloc(sizeof(patient));
-    patient *currentPatient = hospitalGlobalData.firstPatient;
-
-    while (currentPatient->nextPatient != NULL &&
-            strcmp(currentPatient->patientName, patientName) > 0) {
-        currentPatient = currentPatient->nextPatient;
-    }
-
-    newPatient->nextPatient = currentPatient->nextPatient;
-    currentPatient->nextPatient = newPatient;
-}
-*/
-
-/*
-void addNewDisease(char *patientName,
-                   char *diseaseName,
-                   char *diseaseDescription) {
-    patient *currentPatient = hospitalGlobalData.firstPatient;
-
-    // Insert patient into descending list sorted by patientName field.
-
-    // Find patient in patientList that's
-    // patientName field proceeds argument patientName.
-    while (currentPatient->nextPatient != NULL &&
-           strcmp(currentPatient->patientName, patientName) > 0) {
-        currentPatient = currentPatient->nextPatient;
-    }
-
-    // Checks whether patient with patientName value exists in hospitalData
-    // if not, allocates memory for new patient and initializes it's structure.
-    if (strcmp(currentPatient->patientName, patientName) < 0) {
-        patient *newPatient = malloc(sizeof(patient));
-
-        newPatient->patientName = patientName;
-        newPatient->diseaseList = malloc(sizeof(diseaseListNode));
-        newPatient->nextPatient = NULL;
-        newPatient->diseaseCount = 0;
-        newPatient->nextPatient = currentPatient->nextPatient;
-        currentPatient->nextPatient = newPatient;
-    }
-
-    currentPatient = currentPatient->nextPatient;
-
-    // Adds new disease to patient diseaseList.
-
-    diseaseListNode *currentDisease = currentPatient->diseaseList;
-
-    // Finds disease in diseaseList that's
-    // diseaseName field proceeds argument diseaseName.
-    while (currentDisease->nextDisease != NULL &&
-           strcmp(currentDisease->nextDisease->diseaseReference->diseaseName,
-                  diseaseName) > 0) {
-        currentDisease = currentDisease->nextDisease;
-    }
-
-    // Allocates memory for diseaseReference.
-    diseaseReference *newDisease = malloc(sizeof(diseaseReference));
-
-    // Initializes diseaseReference with arguments passed to the function.
-    newDisease->diseaseName = diseaseName;
-    newDisease->diseaseDescription = diseaseDescription;
-    newDisease->referenceCount = 1;
-    // MISSING INSERTION
-
-    // Updates currentPatient and global hospitalGlobalData structures.
-    currentPatient->diseaseCount += 1;
-    hospitalGlobalData.storedDiseasesCount += 1;
-}
-*/

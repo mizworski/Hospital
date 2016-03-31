@@ -4,10 +4,10 @@
 #endif //IPP_1_STRUCTURE_H
 
 typedef struct patient patient;
-typedef struct diseaseObject diseaseReference;
+typedef struct diseaseStructure diseaseStructure;
 typedef struct diseaseListNode diseaseListNode;
 
-struct diseaseObject {
+struct diseaseStructure {
     char *diseaseName;
     char *diseaseDescription;
     int referenceCount;
@@ -15,7 +15,7 @@ struct diseaseObject {
 
 struct diseaseListNode {
     diseaseListNode *nextDisease;
-    struct diseaseObject *diseaseReference; // Something is wrong with typedef.
+    struct diseaseStructure *diseaseReference; // Something is wrong with typedef.
 };
 
 struct patient {
@@ -26,6 +26,10 @@ struct patient {
 };
 
 void initializeHospitalGlobalData(void);
+
+void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference);
+
+void clearPatientData(patient *patientBeingRemoved);
 
 void clearAllocatedMemory(void);
 
