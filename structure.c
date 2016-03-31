@@ -41,6 +41,8 @@ void initializeHospitalGlobalData(void) {
 void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference) {
     diseaseReference->referenceCount--;
 
+    // If disease is not being referenced by any patient then it can and have
+    // to be freed.
     if(diseaseReference->referenceCount == 0) {
         free(diseaseReference->diseaseName);
         free(diseaseReference->diseaseDescription);
@@ -49,16 +51,16 @@ void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference) {
 }
 
 void clearPatientData(patient *patientBeingRemoved) {
-    // Frees list of patient's diseases.
-    diseaseListNode *diseaseBeingRemoved = patientBeingRemoved->diseaseList;
-    diseaseListNode *temporaryDisease;
-    while (diseaseBeingRemoved != NULL) {
-        temporaryDisease = diseaseBeingRemoved;
-        decreaseCountAndFreeIfNotReferenced(diseaseBeingRemoved->diseaseReference);
-        diseaseBeingRemoved = diseaseBeingRemoved->nextDisease;
-        free(temporaryDisease);
-    }
+    diseaseListNode *diseaseListBeingRemoved = patientBeingRemoved->diseaseList;
+    diseaseListNode *temporaryDiseaseList;
 
+    // Frees diseaseStructure from patient's diseaseList one by one.
+    while (diseaseListBeingRemoved != NULL) {
+        temporaryDiseaseList = diseaseListBeingRemoved;
+        decreaseCountAndFreeIfNotReferenced(diseaseListBeingRemoved->diseaseReference);
+        diseaseListBeingRemoved = diseaseListBeingRemoved->nextDisease;
+        free(temporaryDiseaseList);
+    }
     free(patientBeingRemoved->patientName);
     free(patientBeingRemoved);
 }
@@ -77,12 +79,9 @@ void clearAllocatedMemory(void) {
 patient* findPatientPrecedingGivenName(char *patientName) {
     patient *currentPatient = hospitalGlobalData.firstPatient;
 
-    // Insert patient into descending list sorted by patientName field.
-
-    // Find patient in patientList that's
-    // patientName field proceeds argument patientName.
+    // Find patient
     while (currentPatient->nextPatient != NULL &&
-           strcmp(currentPatient->nextPatient->patientName, patientName) > 0) {
+           strcmp(currentPatient->nextPatient->patientName, patientName) < 0) {
         // Lazy evaluation.
         currentPatient = currentPatient->nextPatient;
     }
@@ -92,8 +91,11 @@ patient* findPatientPrecedingGivenName(char *patientName) {
 
 patient* getPatientPointer(char *patientName,
                            patient *currentPatient) {
+    // Checks if we are at the end of the list or proceeding patient's
+    // patientName is greater (in lexicographical order).
+    // If so allocates and initializes newPatient.
     if (currentPatient->nextPatient == NULL || // Lazy evaluation.
-            strcmp(currentPatient->nextPatient->patientName, patientName) < 0) {
+            strcmp(currentPatient->nextPatient->patientName, patientName) > 0) {
         patient *newPatient = malloc(sizeof(patient));
 
         newPatient->patientName = patientName;
@@ -105,6 +107,7 @@ patient* getPatientPointer(char *patientName,
         currentPatient->nextPatient = newPatient;
     }
 
+    // Patient proceeding its preceding patient is that patient.
     return currentPatient->nextPatient;
 }
 
@@ -117,7 +120,7 @@ diseaseListNode* findDiseasePrecedingGivenDisease(char *diseaseName,
     // diseaseName field proceeds argument diseaseName.
     while (currentDisease->nextDisease != NULL &&
            strcmp(currentDisease->nextDisease->diseaseReference->diseaseName,
-                  diseaseName) > 0) { // Lazy evaluation.
+                  diseaseName) < 00) { // Lazy evaluation.
         currentDisease = currentDisease->nextDisease;
     }
 
@@ -150,12 +153,19 @@ void createDiseaseRegistry(patient* currentPatient,
 void addNewDisease(char *patientName,
                    char *diseaseName,
                    char *diseaseDescription) {
-    // Finds patient with patientName preceding patientName given as argument.
+    // We want to sort our patients by their patientName field in
+    // lexicographical, ascending order.
+
+    // Finds patient with patientName field preceding patientName given as
+    // argument.
     patient *precedingPatient = findPatientPrecedingGivenName(patientName);
 
     // Gets pointer to patient with patientName same as given argument
     // (allocates and initializes new structure if patient doesn't exists).
     precedingPatient = getPatientPointer(patientName, precedingPatient);
+
+    // We also want to sort our diseases on diseaseList in lexicographical,
+    // ascending order.
 
     // Finds disease with diseaseName preceding diseaseName given as argument.
     diseaseListNode *precedingDisease =
