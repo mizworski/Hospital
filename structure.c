@@ -63,7 +63,7 @@ patient* findPatientPrecedingGivenName(char *patientName) {
 patient* getPatientPointer(char *patientName,
                            patient *currentPatient) {
     if (currentPatient->nextPatient == NULL || // Lazy evaluation.
-            strcmp(currentPatient->patientName, patientName) < 0) {
+            strcmp(currentPatient->nextPatient->patientName, patientName) < 0) {
         patient *newPatient = malloc(sizeof(patient));
 
         newPatient->patientName = patientName;

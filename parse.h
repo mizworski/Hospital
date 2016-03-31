@@ -4,7 +4,7 @@ int getOperationCode(char *operationString, size_t *charsShiftInString);
 
 char* getSingleArgumentFromString(char **bufferedString);
 
-void getArgumentsFromString(char **bufferedString,
+void getArgumentsFromString(char *bufferedString,
                             int operationCode,
                             int *integerArgument,
                             char **stringArgument1,

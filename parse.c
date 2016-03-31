@@ -20,7 +20,6 @@ int getOperationCode(char *operationString, size_t *charsShiftInString) {
         charCount++;
     }
 
-
     *charsShiftInString = (size_t) charCount;
 
     if ((strncmp(operationString, "NEW_DISEASE_ENTER_DESCRIPTION", *charsShiftInString) == 0)) {
@@ -111,7 +110,6 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
     char *lineReadArrayPointer = NULL;
     char lineRead[MAX_LINE_SIZE];
     char *bufferedString = malloc(MAX_LINE_SIZE * sizeof(char));
-    char *pointerToFree = bufferedString;
     int operationCode;
 
     lineReadArrayPointer = fgets(lineRead, MAX_LINE_SIZE, stdin);
@@ -133,8 +131,6 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
                                stringArgument2,
                                stringArgument3);
     }
-
-    free(pointerToFree);
 
     return operationCode;
 }
