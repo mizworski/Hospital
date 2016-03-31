@@ -1,12 +1,10 @@
-#ifndef IPP_1_PARSE_H
-#define IPP_1_PARSE_H
+#include <stdio.h>
 
-#endif //IPP_1_PARSE_H
 int getOperationCode(char *operationString, size_t *charsShiftInString);
 
 char* getSingleArgumentFromString(char **bufferedString);
 
-void getArgumentsFromString(char *bufferedString,
+void getArgumentsFromString(char **bufferedString,
                             int operationCode,
                             int *integerArgument,
                             char **stringArgument1,
