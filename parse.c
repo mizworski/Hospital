@@ -92,6 +92,8 @@ void getArgumentsFromString(char *bufferedString,
                             char **stringArgument1,
                             char **stringArgument2) {
     char **dummyPointer = NULL;
+    char *integerBuffer = NULL;
+
     switch (operationCode) {
         case NEW_DISEASE_ENTER_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
@@ -105,17 +107,23 @@ void getArgumentsFromString(char *bufferedString,
             break;
         case CHANGE_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            integerBuffer = getSingleArgumentFromString(&bufferedString);
             *integerArgument =
-                    (int) strtol(getSingleArgumentFromString(&bufferedString),
+                    (int) strtol(integerBuffer,
                                  dummyPointer,
                                  INTEGER_FROM_STRING_BASE);
+            free(integerBuffer);
+            integerBuffer = NULL;
             *stringArgument2 = getStringTillEndLine(&bufferedString);
             break;
         case PRINT_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *integerArgument = (int) strtol(bufferedString,
+            integerBuffer = getStringTillEndLine(&bufferedString);
+            *integerArgument = (int) strtol(integerBuffer,
                                             dummyPointer,
                                             INTEGER_FROM_STRING_BASE);
+            free(integerBuffer);
+            integerBuffer = NULL;
             break;
         case DELETE_PATIENT_DATA:
             *stringArgument1 = getStringTillEndLine(&bufferedString);
@@ -124,7 +132,7 @@ void getArgumentsFromString(char *bufferedString,
             break;
         case WRONG_INPUT:
             break;
-        default: // There is no default.
+        default:
             break;
     }
 }
