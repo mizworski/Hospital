@@ -27,6 +27,5 @@ parse_dbg.o: parse.c parse.h
 structure_dbg.o: structure.c structure.h
 	$(CC) $(CFLAGS) -g -o structure_dbg.o -c structure.c
 
-
 clean :
 	-rm hospital hospital.dbg $(OBJS) $(DBG)
