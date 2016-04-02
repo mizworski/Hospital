@@ -75,7 +75,7 @@ void clearAllocatedMemory(void);
 
 void performOperation(int operationCode,
                       int *integerArgument,
-                      char **stringArgument1,
-                      char **stringArgument2);
+                      char *stringArgument1,
+                      char *stringArgument2);
 
 #endif /* STRUCTURE_H */

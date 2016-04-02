@@ -29,8 +29,8 @@ int main (int argc, char **argv) {
     while (operationCode != LINE_WAS_NOT_READ) {
         performOperation(operationCode,
                          &integerArgument,
-                         &stringArgument1,
-                         &stringArgument2);
+                         stringArgument1,
+                         stringArgument2);
 
         if (debugMode) {
             debugModePrintDescriptions();

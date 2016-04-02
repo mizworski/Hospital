@@ -220,7 +220,6 @@ void changePatientDiseaseDescription(char *patientName,
     diseaseStructure *diseaseToModify = NULL;
     diseaseStructure *newDisease = NULL;
 
-
     patientPrecedingCurrentPatient = findPatientPrecedingGivenName(patientName);
     currentPatient = patientPrecedingCurrentPatient->nextPatient;
 
@@ -229,6 +228,7 @@ void changePatientDiseaseDescription(char *patientName,
         // tried referring to disease with wrong ID.
         printIgnoredUponFailure();
         free(diseaseDescription);
+        diseaseDescription = NULL;
     } else {
         diseaseListNodeToModify = findDiseaseListNode(currentPatient,
                                                       diseaseID);
@@ -336,30 +336,30 @@ void clearAllocatedMemory(void) {
 
 void performOperation(int operationCode,
                       int *integerArgument,
-                      char **stringArgument1,
-                      char **stringArgument2) {
+                      char *stringArgument1,
+                      char *stringArgument2) {
     switch (operationCode) {
         case -1:
             break;
         case 1:
-            addNewDisease(*stringArgument1,
-                          *stringArgument2);
+            addNewDisease(stringArgument1,
+                          stringArgument2);
             break;
         case 2:
-            copyLatestDisease(*stringArgument1,
-                              *stringArgument2);
+            copyLatestDisease(stringArgument1,
+                              stringArgument2);
             break;
         case 3:
-            changePatientDiseaseDescription(*stringArgument1,
+            changePatientDiseaseDescription(stringArgument1,
                                             *integerArgument,
-                                            *stringArgument2);
+                                            stringArgument2);
             break;
         case 4:
-            printDiseaseDescription(*stringArgument1,
+            printDiseaseDescription(stringArgument1,
                                     *integerArgument);
             break;
         case 5:
-            deletePatientDiseaseData(*stringArgument1);
+            deletePatientDiseaseData(stringArgument1);
             break;
         case 0:
         default:

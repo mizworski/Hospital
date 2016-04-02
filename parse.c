@@ -70,6 +70,22 @@ char* getSingleArgumentFromString(char **bufferedString) {
     return argumentFromString;
 }
 
+char* getStringTillEndLine(char **bufferedString) {
+    int charCount = 0;
+    char *argumentFromString = NULL;
+
+    while ((*bufferedString)[charCount] != '\n') {
+        charCount++;
+    }
+
+    argumentFromString = malloc((charCount + 1) * sizeof(char));
+
+    strncpy(argumentFromString, *bufferedString, (size_t) charCount);
+    argumentFromString[charCount] = '\0';
+
+    return argumentFromString;
+}
+
 void getArgumentsFromString(char *bufferedString,
                             int operationCode,
                             int *integerArgument,
@@ -79,7 +95,7 @@ void getArgumentsFromString(char *bufferedString,
     switch (operationCode) {
         case NEW_DISEASE_ENTER_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument2 = bufferedString;
+            *stringArgument2 = getStringTillEndLine(&bufferedString);
             *integerArgument = -1;
             break;
         case NEW_DISEASE_COPY_DESCRIPTION:
@@ -93,7 +109,7 @@ void getArgumentsFromString(char *bufferedString,
                     (int) strtol(getSingleArgumentFromString(&bufferedString),
                                  dummyPointer,
                                  INTEGER_FROM_STRING_BASE);
-            *stringArgument2 = bufferedString;
+            *stringArgument2 = getStringTillEndLine(&bufferedString);
             break;
         case PRINT_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
@@ -119,10 +135,11 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
     char *lineReadArrayPointer = NULL;
     char lineRead[MAX_LINE_SIZE];
     char *bufferedString = malloc(MAX_LINE_SIZE * sizeof(char));
+    char *bufferStartingPoint = bufferedString;
     int operationCode;
 
     lineReadArrayPointer = fgets(lineRead, MAX_LINE_SIZE, stdin);
-    lineRead[strcspn(lineRead, "\n")] = 0;
+//    lineRead[strcspn(lineRead, "\n")] = 0;
 
     if (lineReadArrayPointer == NULL) {
         operationCode = LINE_WAS_NOT_READ;
@@ -139,6 +156,8 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
                                stringArgument1,
                                stringArgument2);
     }
+
+    free(bufferStartingPoint);
 
     return operationCode;
 }
