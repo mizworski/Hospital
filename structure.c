@@ -43,12 +43,12 @@ void printIgnoredUponFailure(void) {
     printf("IGNORED\n");
 }
 
-void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference) {
+void decreaseCountAndFreeIfNotReferred(diseaseStructure *diseaseReference) {
     diseaseReference->referenceCount--;
 
     // If disease is not being referenced by any patient then it can and have
     // to be freed.
-    if(diseaseReference->referenceCount == 0) {
+    if (diseaseReference->referenceCount == 0) {
         free(diseaseReference->diseaseName);
         free(diseaseReference->diseaseDescription);
     }
@@ -62,7 +62,8 @@ void clearPatientData(patient *patientBeingRemoved) {
     // Frees diseaseStructure from patient's diseaseListHead one by one.
     while (diseaseListBeingRemoved != NULL) {
         temporaryDiseaseList = diseaseListBeingRemoved;
-        decreaseCountAndFreeIfNotReferenced(diseaseListBeingRemoved->diseaseReference);
+        decreaseCountAndFreeIfNotReferred(
+                diseaseListBeingRemoved->diseaseReference);
         diseaseListBeingRemoved = diseaseListBeingRemoved->nextDisease;
         free(temporaryDiseaseList);
     }
@@ -107,6 +108,7 @@ patient* getPatientPointerAllocateIfNull(char *patientName,
         // Initializes dummy ahead diseaseListHead.
         newPatient->diseaseListHead = malloc(sizeof(diseaseListNode));
         newPatient->diseaseListLast = newPatient->diseaseListHead;
+        newPatient->diseaseListLast->nextDisease = NULL;
         newPatient->nextPatient = NULL;
         newPatient->diseaseCount = 0; // NOT NEEDED
         newPatient->nextPatient = currentPatient->nextPatient;
@@ -127,6 +129,7 @@ void createDiseaseRegistry(patient* currentPatient,
     // Initializes diseaseListNode with arguments passed to the function.
     newDiseaseNode->nextDisease = currentPatient->diseaseListLast->nextDisease;
     currentPatient->diseaseListLast->nextDisease = newDiseaseNode;
+    currentPatient->diseaseListLast = newDiseaseNode;
     newDiseaseNode->diseaseReference = newDisease;
 
     // Initializes diseaseStructure with arguments passed to the function.
@@ -163,28 +166,109 @@ void addNewDisease(char *patientName,
                           diseaseDescription);
 }
 
+void addDiseaseToPatientList(patient *currentPatient,
+                             diseaseStructure *diseaseAdded) {
+    diseaseListNode *newDiseaseListNode = malloc(sizeof(diseaseListNode));
+
+    newDiseaseListNode->nextDisease =
+            currentPatient->diseaseListLast->nextDisease; // == NULL
+    currentPatient->diseaseListLast->nextDisease = newDiseaseListNode;
+    currentPatient->diseaseListLast = newDiseaseListNode;
+    newDiseaseListNode->diseaseReference = diseaseAdded;
+    diseaseAdded->referenceCount++;
+}
+
+void addDiseaseToListAfterListNode(patient *currentPatient,
+                                   diseaseStructure *diseaseAdded) {
+    diseaseListNode *newDiseaseListNode = malloc(sizeof(diseaseListNode));
+
+    newDiseaseListNode->nextDisease =
+            currentPatient->diseaseListLast->nextDisease; // == NULL
+    currentPatient->diseaseListLast->nextDisease = newDiseaseListNode;
+    currentPatient->diseaseListLast = newDiseaseListNode;
+    newDiseaseListNode->diseaseReference = diseaseAdded;
+    diseaseAdded->referenceCount++;
+}
+
 void copyLatestDisease(char *toPatientName,
                        char *fromPatientName) {
     patient *fromPatient = NULL;
-//    diseaseStructure *diseaseCopied = NULL;
+    patient *toPatient = NULL;
 
-    fromPatient = findPatientPrecedingGivenName(fromPatientName);
-    fromPatient = fromPatient->nextPatient;
-    if (fromPatient == NULL ||
+    patient *patientPrecedingFromPatient = NULL;
+    patient *patientPrecedingToPatient = NULL;
+
+    diseaseStructure *diseaseCopied = NULL;
+
+    patientPrecedingFromPatient = findPatientPrecedingGivenName(fromPatientName);
+    fromPatient = patientPrecedingFromPatient->nextPatient;
+
+    if (fromPatient == NULL || // Lazy evaluation.
             fromPatient->diseaseListHead == fromPatient->diseaseListLast) {
+        // If diseaseListHead equals diseaseListLast then our list of
+        // diseases is empty (we keep dummy ahead that list).
         printIgnoredUponFailure();
         free(fromPatient);
         free(toPatientName);
     } else {
+        patientPrecedingToPatient = findPatientPrecedingGivenName(toPatientName);
+        toPatient = getPatientPointerAllocateIfNull(toPatientName,
+                                                    patientPrecedingToPatient);
+        diseaseCopied = fromPatient->diseaseListLast->diseaseReference;
+
+        addDiseaseToPatientList(toPatient, diseaseCopied);
 
     }
+}
+
+// Returns NULL when diseaseListNode was not found.
+diseaseListNode* findDiseaseListNode (patient *currentPatient,
+                                      int diseaseID) {
+    diseaseListNode* diseaseListNodeToReturn = NULL;
+    diseaseListNode* currentDiseaseListNode = currentPatient->diseaseListHead;
+
+    int diseaseCount;
+
+    for (diseaseCount = 0; diseaseCount < diseaseID &&
+            currentDiseaseListNode != NULL; diseaseCount++) {
+        currentDiseaseListNode = currentDiseaseListNode->nextDisease;
+    }
+
+    if (diseaseCount == diseaseID) {
+        diseaseListNodeToReturn = currentDiseaseListNode;
+    }
+
+    return diseaseListNodeToReturn;
 }
 
 void changePatientDiseaseDescription(char *patientName,
                                      int diseaseID,
                                      char *diseaseName,
                                      char *diseaseDescription) {
+    patient *currentPatient = NULL;
+    patient *patientPrecedingCurrentPatient = NULL;
 
+    diseaseListNode *diseaseListNodeToModify = NULL;
+    diseaseStructure *diseaseToModify = NULL;
+//    diseaseStructure *newDisease = NULL;
+
+    patientPrecedingCurrentPatient = findPatientPrecedingGivenName(patientName);
+    currentPatient = patientPrecedingCurrentPatient->nextPatient;
+
+    if (currentPatient == NULL || diseaseID < 1) {
+        // Patient was not found in database or
+        // tried referring to disease with wrong ID.
+        printIgnoredUponFailure();
+        free(patientName);
+        free(diseaseName);
+        free(diseaseDescription);
+    } else {
+        diseaseListNodeToModify = findDiseaseListNode(currentPatient,
+                                                      diseaseID);
+        diseaseToModify = diseaseListNodeToModify->diseaseReference;
+        decreaseCountAndFreeIfNotReferred(diseaseToModify);
+//        newDisease = NULL;
+    }
 }
 
 void printDiseaseDescription(char *patientName,

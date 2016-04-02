@@ -29,7 +29,7 @@ void initializeHospitalGlobalData(void);
 
 void printIgnoredUponFailure(void);
 
-void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference);
+void decreaseCountAndFreeIfNotReferred(diseaseStructure *diseaseReference);
 
 void clearPatientData(patient *patientBeingRemoved);
 

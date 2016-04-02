@@ -10,9 +10,9 @@
 int main (int argc, char **argv) {
     int operationCode;
     int integerArgument;
-    char *stringArgument1;
-    char *stringArgument2;
-    char *stringArgument3;
+    char *stringArgument1 = NULL;
+    char *stringArgument2 = NULL;
+    char *stringArgument3 = NULL;
     bool debugMode = false;
 
     // Checks if program was executed in debug mode.
