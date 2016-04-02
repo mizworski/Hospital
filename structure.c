@@ -39,18 +39,9 @@ void debugModePrintDescriptions(void) {
 }
 
 void decreaseCountAndDeleteIfNotReferred(diseaseStructure *diseaseReference) {
-//    char *descriptionToFree = NULL;
-
     diseaseReference->referenceCount--;
 
-    // If disease is not being referenced by any patient then it can and have
-    // to be freed.
-
-    // TODO Dunno if I have to free this string.
-
     if (diseaseReference->referenceCount == 0) {
-//        descriptionToFree = diseaseReference->diseaseDescription;
-//        free(descriptionToFree);
         free(diseaseReference);
         diseaseReference = NULL;
         hospitalGlobalData.storedDiseasesCount--;
@@ -87,6 +78,9 @@ patient* getPatientPointerAllocateIfNull(char *patientName,
 
         newPatient->nextPatient = currentPatient->nextPatient;
         currentPatient->nextPatient = newPatient;
+    } else {
+        free(patientName);
+        patientName = NULL;
     }
 
     // Now patient next to our currentPatient is our patient.
