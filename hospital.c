@@ -5,7 +5,6 @@
 #include "structure.h"
 
 #define DEBUG_MODE          "-v"
-#define LINE_WAS_NOT_READ   -1
 
 int main (int argc, char **argv) {
     int operationCode;
@@ -23,10 +22,11 @@ int main (int argc, char **argv) {
 
     initializeHospitalGlobalData();
 
-    do {
-        operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
-                                                             &stringArgument1,
-                                                             &stringArgument2);
+    operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
+                                                         &stringArgument1,
+                                                         &stringArgument2);
+
+    while (operationCode != LINE_WAS_NOT_READ) {
         performOperation(operationCode,
                          &integerArgument,
                          &stringArgument1,
@@ -35,7 +35,11 @@ int main (int argc, char **argv) {
         if (debugMode) {
             debugModePrintDescriptions();
         }
-    } while (operationCode != LINE_WAS_NOT_READ);
+
+        operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
+                                                             &stringArgument1,
+                                                             &stringArgument2);
+    }
 
     clearAllocatedMemory();
 
