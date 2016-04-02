@@ -139,7 +139,6 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
     int operationCode;
 
     lineReadArrayPointer = fgets(lineRead, MAX_LINE_SIZE, stdin);
-//    lineRead[strcspn(lineRead, "\n")] = 0;
 
     if (lineReadArrayPointer == NULL) {
         operationCode = LINE_WAS_NOT_READ;

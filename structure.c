@@ -72,24 +72,24 @@ patient* findPatientPrecedingGivenName(char *patientName) {
 
 patient* getPatientPointerAllocateIfNull(char *patientName,
                                          patient *currentPatient) {
-    // Checks if we are at the end of the list or proceeding patient's
-    // patientName is greater (in lexicographical order).
-    // If so allocates and initializes newPatient.
+    // Checks if we are at the end of the list or next patient on the list is
+    // not our patient. If so allocates and initializes newPatient.
     if (currentPatient->nextPatient == NULL || // Lazy evaluation.
             strcmp(currentPatient->nextPatient->patientName, patientName) != 0) {
         patient *newPatient = malloc(sizeof(patient));
 
         newPatient->patientName = patientName;
-        // Initializes dummy ahead diseaseListHead.
+        // Initializes dummy and sets diseaseListHead to point that dummy.
         newPatient->diseaseListHead = malloc(sizeof(diseaseListNode));
         newPatient->diseaseListLast = newPatient->diseaseListHead;
         newPatient->diseaseListLast->nextDisease = NULL;
-        newPatient->nextPatient = NULL;
+        newPatient->diseaseListHead->diseaseReference = NULL;
+
         newPatient->nextPatient = currentPatient->nextPatient;
         currentPatient->nextPatient = newPatient;
     }
 
-    // Patient proceeding its preceding patient is that patient.
+    // Now patient next to our currentPatient is our patient.
     return currentPatient->nextPatient;
 }
 
@@ -232,11 +232,17 @@ void changePatientDiseaseDescription(char *patientName,
     } else {
         diseaseListNodeToModify = findDiseaseListNode(currentPatient,
                                                       diseaseID);
-        diseaseToModify = diseaseListNodeToModify->diseaseReference;
-        decreaseCountAndDeleteIfNotReferred(diseaseToModify);
-        newDisease = createNewDiseaseStructure(diseaseDescription);
-        diseaseListNodeToModify->diseaseReference = newDisease;
-        printOKUponSuccess();
+        if (diseaseListNodeToModify == NULL) {
+            printIgnoredUponFailure();
+            free(diseaseDescription);
+            diseaseDescription = NULL;
+        } else {
+            diseaseToModify = diseaseListNodeToModify->diseaseReference;
+            decreaseCountAndDeleteIfNotReferred(diseaseToModify);
+            newDisease = createNewDiseaseStructure(diseaseDescription);
+            diseaseListNodeToModify->diseaseReference = newDisease;
+            printOKUponSuccess();
+        }
     }
 
     free(patientName);
@@ -273,24 +279,26 @@ void printDiseaseDescription(char *patientName,
 }
 
 void deletePatientDiseaseList(patient *currentPatient) {
-    diseaseListNode *diseaseListNodeBeingRemoved =
-            currentPatient->diseaseListHead->nextDisease;
-    diseaseListNode *temporaryDiseaseListNode = NULL;
+    if (currentPatient->diseaseListHead != NULL) {
+        diseaseListNode *nextDiseaseListNodeToRemove =
+                currentPatient->diseaseListHead->nextDisease;
+        diseaseListNode *temporaryDiseaseListNode = NULL;
 
-    // Frees diseaseStructure from patient's diseaseListHead one by one.
-    while (diseaseListNodeBeingRemoved != NULL) {
-        temporaryDiseaseListNode = diseaseListNodeBeingRemoved;
-        decreaseCountAndDeleteIfNotReferred(
-                temporaryDiseaseListNode->diseaseReference);
-        temporaryDiseaseListNode->diseaseReference = NULL;
-        diseaseListNodeBeingRemoved = diseaseListNodeBeingRemoved->nextDisease;
-        temporaryDiseaseListNode->nextDisease = NULL;
-        free(temporaryDiseaseListNode);
-        temporaryDiseaseListNode = NULL;
+        // Frees diseaseStructure from patient's diseaseListHead one by one.
+        while (nextDiseaseListNodeToRemove != NULL) {
+            temporaryDiseaseListNode = nextDiseaseListNodeToRemove;
+            decreaseCountAndDeleteIfNotReferred(
+                    temporaryDiseaseListNode->diseaseReference);
+            temporaryDiseaseListNode->diseaseReference = NULL;
+            nextDiseaseListNodeToRemove = nextDiseaseListNodeToRemove->nextDisease;
+            temporaryDiseaseListNode->nextDisease = NULL;
+            free(temporaryDiseaseListNode);
+            temporaryDiseaseListNode = NULL;
+        }
+
+        currentPatient->diseaseListHead->nextDisease = NULL;
+        currentPatient->diseaseListLast = currentPatient->diseaseListHead;
     }
-
-    currentPatient->diseaseListHead->nextDisease = NULL;
-    currentPatient->diseaseListLast = currentPatient->diseaseListHead;
 }
 
 void deletePatientData(patient *patientBeingRemoved) {
@@ -298,6 +306,7 @@ void deletePatientData(patient *patientBeingRemoved) {
     // Frees dummy from head of the list.
     free(patientBeingRemoved->diseaseListHead);
     patientBeingRemoved->diseaseListHead = NULL;
+    patientBeingRemoved->diseaseListLast = NULL;
     free(patientBeingRemoved->patientName);
     patientBeingRemoved->patientName = NULL;
     free(patientBeingRemoved);
@@ -325,11 +334,11 @@ void deletePatientDiseaseData(char *patientName) {
 
 void clearAllocatedMemory(void) {
     // Frees list of patients from global structure.
-    patient *patientBeingRemoved = hospitalGlobalData.firstPatient;
-    patient *temporaryPatient;
-    while (patientBeingRemoved != NULL) {
-        temporaryPatient = patientBeingRemoved;
-        patientBeingRemoved = patientBeingRemoved->nextPatient;
+    patient *nextPatientToRemove = hospitalGlobalData.firstPatient;
+    patient *temporaryPatient = NULL;
+    while (nextPatientToRemove != NULL) {
+        temporaryPatient = nextPatientToRemove;
+        nextPatientToRemove = nextPatientToRemove->nextPatient;
         deletePatientData(temporaryPatient);
     }
 }

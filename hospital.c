@@ -25,8 +25,8 @@ int main (int argc, char **argv) {
     operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
                                                          &stringArgument1,
                                                          &stringArgument2);
-
-    while (operationCode != LINE_WAS_NOT_READ) {
+    /*int i = 0; // dsdsdsd*/
+    while (operationCode != LINE_WAS_NOT_READ /*&& i < 10*/) { // dsdsds
         performOperation(operationCode,
                          &integerArgument,
                          stringArgument1,
@@ -39,9 +39,10 @@ int main (int argc, char **argv) {
         operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
                                                              &stringArgument1,
                                                              &stringArgument2);
+        /*i++; // DASDAD*/
     }
 
-    // clearAllocatedMemory();
+    clearAllocatedMemory();
 
     return 0;
 }
