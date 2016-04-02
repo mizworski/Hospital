@@ -2,6 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define SUCCES_MESSAGE          "OK\n"
+#define IGNORE_MESSAGE          "IGNORED\n"
+#define DESCRIPTION_MESSAGE     "DESCRIPTIONS: %d\n"
+
+// TODO SET NULL AFTER FREEING
+
 typedef struct hospitalData hospitalData;
 typedef struct patient patient;
 typedef struct diseaseStructure diseaseStructure;
@@ -40,7 +46,11 @@ void initializeHospitalGlobalData(void) {
 }
 
 void printIgnoredUponFailure(void) {
-    printf("IGNORED\n");
+    printf(IGNORE_MESSAGE);
+}
+
+void printOKUponSucces(void) {
+    printf(SUCCES_MESSAGE);
 }
 
 void decreaseCountAndFreeIfNotReferred(diseaseStructure *diseaseReference) {
@@ -55,8 +65,9 @@ void decreaseCountAndFreeIfNotReferred(diseaseStructure *diseaseReference) {
     free(diseaseReference);
 }
 
-void clearPatientData(patient *patientBeingRemoved) {
-    diseaseListNode *diseaseListBeingRemoved = patientBeingRemoved->diseaseListHead;
+void deletePatientDiseaseList(patient *currentPatient) {
+    diseaseListNode *diseaseListBeingRemoved =
+            currentPatient->diseaseListHead->nextDisease;
     diseaseListNode *temporaryDiseaseList;
 
     // Frees diseaseStructure from patient's diseaseListHead one by one.
@@ -67,6 +78,15 @@ void clearPatientData(patient *patientBeingRemoved) {
         diseaseListBeingRemoved = diseaseListBeingRemoved->nextDisease;
         free(temporaryDiseaseList);
     }
+
+    currentPatient->diseaseListLast = currentPatient->diseaseListHead;
+    currentPatient->diseaseListHead = NULL;
+}
+
+void deletePatientData(patient *patientBeingRemoved) {
+    deletePatientDiseaseList(patientBeingRemoved);
+    // Frees dummy from head of the list.
+    free(patientBeingRemoved->diseaseListHead);
     free(patientBeingRemoved->patientName);
     free(patientBeingRemoved);
 }
@@ -78,7 +98,7 @@ void clearAllocatedMemory(void) {
     while (patientBeingRemoved != NULL) {
         temporaryPatient = patientBeingRemoved;
         patientBeingRemoved = patientBeingRemoved->nextPatient;
-        clearPatientData(temporaryPatient);
+        deletePatientData(temporaryPatient);
     }
 }
 
@@ -119,12 +139,29 @@ patient* getPatientPointerAllocateIfNull(char *patientName,
     return currentPatient->nextPatient;
 }
 
-void createDiseaseRegistry(patient* currentPatient,
-                           char *diseaseName,
-                           char *diseaseDescription) {
+diseaseStructure* createNewDiseaseStructure(char *diseaseName,
+                                            char *diseaseDescription) {
+    diseaseStructure *newDisease = malloc(sizeof(diseaseStructure));
+
+    newDisease->diseaseName = diseaseName;
+    newDisease->diseaseDescription = diseaseDescription;
+    newDisease->referenceCount = 1;
+
+    hospitalGlobalData.storedDiseasesCount++;
+
+    return newDisease;
+}
+
+void createNewDiseaseListNode(patient *currentPatient,
+                              char *diseaseName,
+                              char *diseaseDescription) {
     // Allocates memory for diseaseListNode and diseaseStructure.
     diseaseListNode *newDiseaseNode = malloc(sizeof(diseaseListNode));
-    diseaseStructure *newDisease = malloc(sizeof(diseaseStructure));
+    diseaseStructure *newDisease = NULL;
+
+    // Initializes diseaseStructure with arguments passed to the function.
+    newDisease = createNewDiseaseStructure(diseaseName,
+                                           diseaseDescription);
 
     // Initializes diseaseListNode with arguments passed to the function.
     newDiseaseNode->nextDisease = currentPatient->diseaseListLast->nextDisease;
@@ -132,14 +169,10 @@ void createDiseaseRegistry(patient* currentPatient,
     currentPatient->diseaseListLast = newDiseaseNode;
     newDiseaseNode->diseaseReference = newDisease;
 
-    // Initializes diseaseStructure with arguments passed to the function.
-    newDisease->diseaseName = diseaseName;
-    newDisease->diseaseDescription = diseaseDescription;
-    newDisease->referenceCount = 1;
+
 
     // Updates currentPatient and global hospitalGlobalData structures.
     currentPatient->diseaseCount++; // NOT NEEDED
-    hospitalGlobalData.storedDiseasesCount++;
 }
 
 void addNewDisease(char *patientName,
@@ -161,11 +194,13 @@ void addNewDisease(char *patientName,
 
     // Allocates and initializes new structure for disease and inserts that
     // disease at the end of patient diseaseList.
-    createDiseaseRegistry(currentPatient,
-                          diseaseName,
-                          diseaseDescription);
+    createNewDiseaseListNode(currentPatient,
+                             diseaseName,
+                             diseaseDescription);
+    printOKUponSucces();
 }
 
+/*
 void addDiseaseToPatientList(patient *currentPatient,
                              diseaseStructure *diseaseAdded) {
     diseaseListNode *newDiseaseListNode = malloc(sizeof(diseaseListNode));
@@ -177,15 +212,15 @@ void addDiseaseToPatientList(patient *currentPatient,
     newDiseaseListNode->diseaseReference = diseaseAdded;
     diseaseAdded->referenceCount++;
 }
+*/
 
-void addDiseaseToListAfterListNode(patient *currentPatient,
+// Adds disease that currently exists.
+void addDiseaseToListAfterListNode(diseaseListNode *precedingDiseaseListNode,
                                    diseaseStructure *diseaseAdded) {
     diseaseListNode *newDiseaseListNode = malloc(sizeof(diseaseListNode));
 
-    newDiseaseListNode->nextDisease =
-            currentPatient->diseaseListLast->nextDisease; // == NULL
-    currentPatient->diseaseListLast->nextDisease = newDiseaseListNode;
-    currentPatient->diseaseListLast = newDiseaseListNode;
+    newDiseaseListNode->nextDisease = precedingDiseaseListNode->nextDisease;
+    precedingDiseaseListNode->nextDisease = newDiseaseListNode;
     newDiseaseListNode->diseaseReference = diseaseAdded;
     diseaseAdded->referenceCount++;
 }
@@ -208,7 +243,6 @@ void copyLatestDisease(char *toPatientName,
         // If diseaseListHead equals diseaseListLast then our list of
         // diseases is empty (we keep dummy ahead that list).
         printIgnoredUponFailure();
-        free(fromPatient);
         free(toPatientName);
     } else {
         patientPrecedingToPatient = findPatientPrecedingGivenName(toPatientName);
@@ -216,9 +250,13 @@ void copyLatestDisease(char *toPatientName,
                                                     patientPrecedingToPatient);
         diseaseCopied = fromPatient->diseaseListLast->diseaseReference;
 
-        addDiseaseToPatientList(toPatient, diseaseCopied);
-
+        addDiseaseToListAfterListNode(toPatient->diseaseListLast,
+                                      diseaseCopied);
+        toPatient->diseaseListLast = toPatient->diseaseListLast->nextDisease;
+        printOKUponSucces();
     }
+
+    free(fromPatient);
 }
 
 // Returns NULL when diseaseListNode was not found.
@@ -250,7 +288,42 @@ void changePatientDiseaseDescription(char *patientName,
 
     diseaseListNode *diseaseListNodeToModify = NULL;
     diseaseStructure *diseaseToModify = NULL;
-//    diseaseStructure *newDisease = NULL;
+    diseaseStructure *newDisease = NULL;
+
+
+    patientPrecedingCurrentPatient = findPatientPrecedingGivenName(patientName);
+    currentPatient = patientPrecedingCurrentPatient->nextPatient;
+
+    if (currentPatient == NULL || diseaseID < 1) {
+        // Patient was not found in database or
+        // tried referring to disease with wrong ID.
+        printIgnoredUponFailure();
+        free(diseaseName);
+        free(diseaseDescription);
+    } else {
+        diseaseListNodeToModify = findDiseaseListNode(currentPatient,
+                                                      diseaseID);
+        diseaseToModify = diseaseListNodeToModify->diseaseReference;
+        decreaseCountAndFreeIfNotReferred(diseaseToModify);
+        newDisease = createNewDiseaseStructure(diseaseName,
+                                               diseaseDescription);
+        diseaseListNodeToModify->diseaseReference = newDisease;
+        printOKUponSucces();
+    }
+
+    free(patientName);
+}
+
+void printDescription (diseaseStructure *diseaseToPrint) {
+    printf("%s", diseaseToPrint->diseaseDescription);
+}
+
+void printDiseaseDescription(char *patientName,
+                              int diseaseID) {
+    patient *currentPatient = NULL;
+    patient *patientPrecedingCurrentPatient = NULL;
+
+    diseaseListNode *diseaseNodeToPrint = NULL;
 
     patientPrecedingCurrentPatient = findPatientPrecedingGivenName(patientName);
     currentPatient = patientPrecedingCurrentPatient->nextPatient;
@@ -260,24 +333,29 @@ void changePatientDiseaseDescription(char *patientName,
         // tried referring to disease with wrong ID.
         printIgnoredUponFailure();
         free(patientName);
-        free(diseaseName);
-        free(diseaseDescription);
     } else {
-        diseaseListNodeToModify = findDiseaseListNode(currentPatient,
-                                                      diseaseID);
-        diseaseToModify = diseaseListNodeToModify->diseaseReference;
-        decreaseCountAndFreeIfNotReferred(diseaseToModify);
-//        newDisease = NULL;
+        diseaseNodeToPrint = findDiseaseListNode(currentPatient,
+                                                 diseaseID);
+        printDescription(diseaseNodeToPrint->diseaseReference);
     }
 }
 
-void printDiseaseDescription(char *patientName,
-                              int diseaseID) {
-
-}
-
 void deletePatientDiseaseData(char *patientName) {
+    patient *currentPatient = NULL;
+    patient *patientPrecedingCurrentPatient = NULL;
 
+    patientPrecedingCurrentPatient = findPatientPrecedingGivenName(patientName);
+    currentPatient = patientPrecedingCurrentPatient->nextPatient;
+
+    if (currentPatient == NULL) {
+        // Patient was not found in database.
+        printIgnoredUponFailure();
+    } else {
+        deletePatientDiseaseList(currentPatient);
+        printOKUponSucces();
+    }
+
+    free(patientName);
 }
 
 void performOperation(int operationCode,
@@ -317,6 +395,7 @@ void performOperation(int operationCode,
 }
 
 void debugModePrintDescriptions() {
-    fprintf(stderr, "DESCRIPTIONS: %d\n", hospitalGlobalData
-            .storedDiseasesCount);
+    fprintf(stderr,
+            DESCRIPTION_MESSAGE,
+            hospitalGlobalData.storedDiseasesCount);
 }

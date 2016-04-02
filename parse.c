@@ -58,7 +58,7 @@ char* getSingleArgumentFromString(char **bufferedString) {
     char *argumentFromString = NULL;
 
     while ((*bufferedString)[charCount] != ' ' &&
-           (*bufferedString)[charCount] != '\n') {
+           (*bufferedString)[charCount] != '\0') {
         charCount++;
     }
 
@@ -88,7 +88,7 @@ void getArgumentsFromString(char *bufferedString,
             break;
         case NEW_DISEASE_COPY_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument2 = bufferedString;
+            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
             *stringArgument3 = NULL;
             *integerArgument = -1;
             break;

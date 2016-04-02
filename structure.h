@@ -1,8 +1,3 @@
-#ifndef IPP_1_STRUCTURE_H
-#define IPP_1_STRUCTURE_H
-
-#endif //IPP_1_STRUCTURE_H
-
 typedef struct patient patient;
 typedef struct diseaseStructure diseaseStructure;
 typedef struct diseaseListNode diseaseListNode;
@@ -15,7 +10,7 @@ struct diseaseStructure {
 
 struct diseaseListNode {
     diseaseListNode *nextDisease;
-    struct diseaseStructure *diseaseReference; // Something is wrong with typedef.
+    diseaseStructure *diseaseReference; // Something is wrong with typedef.
 };
 
 struct patient {
@@ -31,7 +26,7 @@ void printIgnoredUponFailure(void);
 
 void decreaseCountAndFreeIfNotReferred(diseaseStructure *diseaseReference);
 
-void clearPatientData(patient *patientBeingRemoved);
+void deletePatientData(patient *patientBeingRemoved);
 
 void clearAllocatedMemory(void);
 
@@ -40,9 +35,9 @@ patient* findPatientPrecedingGivenName(char *patientName);
 patient* getPatientPointerAllocateIfNull(char *patientName,
                                          patient *currentPatient);
 
-void createDiseaseRegistry(patient* currentPatient,
-                           char *diseaseName,
-                           char *diseaseDescription);
+void createNewDiseaseListNode(patient *currentPatient,
+                              char *diseaseName,
+                              char *diseaseDescription);
 
 void addNewDisease(char *patientName,
                    char *diseaseName,
