@@ -65,6 +65,7 @@ char* getSingleArgumentFromString(char **bufferedString) {
     argumentFromString = malloc((charCount + 1) * sizeof(char));
 
     strncpy(argumentFromString, *bufferedString, (size_t) charCount);
+    argumentFromString[charCount] = '\0';
 
     // Adds one to skip whitespace.
     *bufferedString += charCount + 1;

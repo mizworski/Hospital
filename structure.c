@@ -332,12 +332,17 @@ void printDiseaseDescription(char *patientName,
         // Patient was not found in database or
         // tried referring to disease with wrong ID.
         printIgnoredUponFailure();
-        free(patientName);
     } else {
         diseaseNodeToPrint = findDiseaseListNode(currentPatient,
                                                  diseaseID);
-        printDescription(diseaseNodeToPrint->diseaseReference);
+        if (diseaseNodeToPrint == NULL) {
+            printIgnoredUponFailure();
+        } else {
+            printDescription(diseaseNodeToPrint->diseaseReference);
+        }
     }
+
+    free(patientName);
 }
 
 void deletePatientDiseaseData(char *patientName) {
