@@ -41,7 +41,7 @@ int main (int argc, char **argv) {
                                                              &stringArgument2);
     }
 
-    clearAllocatedMemory();
+    // clearAllocatedMemory();
 
     return 0;
 }

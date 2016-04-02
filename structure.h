@@ -32,7 +32,7 @@ void printIgnoredUponFailure(void);
 
 void printOKUponSuccess(void);
 
-void debugModePrintDescriptions();
+void debugModePrintDescriptions(void);
 
 void decreaseCountAndDeleteIfNotReferred(diseaseStructure *diseaseReference);
 

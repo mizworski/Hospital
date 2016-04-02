@@ -32,7 +32,7 @@ void printOKUponSuccess(void) {
     printf(SUCCESS_MESSAGE);
 }
 
-void debugModePrintDescriptions() {
+void debugModePrintDescriptions(void) {
     fprintf(stderr,
             DESCRIPTION_MESSAGE,
             hospitalGlobalData.storedDiseasesCount);

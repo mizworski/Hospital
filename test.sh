@@ -19,7 +19,7 @@ if [[ ${debugMode} == 0 ]]
 then
     for input in ${testFilesDir}/*.in; do
         echo "${input%.*}"
-        ./${programName%.*} < ${input} > temp.out
+        ./${programName%.*} < ${input} 1> temp.out
         diff -q "${input%.*}.out" temp.out 1>/dev/null
         if [[ $? == "0" ]]
         then
@@ -32,14 +32,22 @@ then
 else
     for input in ${testFilesDir}/*.in; do
         echo "${input%.*}"
-        ./${programName%.*} < ${input} > temp.out
-        diff -q "${input%.*}.out" temp.out 1>/dev/null
+        ./${programName%.*} -v < ${input} > temp_stdout.out 2>temp_stderr.out
+        diff -q "${input%.*}.out" temp_stdout.out 1>/dev/null
         if [[ $? == "0" ]]
         then
-            echo "Test ${testID} passed."
+            echo "Stdout test ${testID} passed."
         else
-            echo "Test ${testID} did not pass."
+            echo "Stdout test ${testID} did not pass."
         fi
+        diff -q "${input%.*}.err" temp_stderr.out 1>/dev/null
+        if [[ $? == "0" ]]
+        then
+            echo "Stderr test ${testID} passed."
+        else
+            echo "Stderr test ${testID} did not pass."
+        fi
+
         ((testID++))
     done
 fi
