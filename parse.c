@@ -1,8 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "parse.h"
 
-#define LINE_WAS_NOT_READ                       -1
 #define WRONG_INPUT                             0
 #define NEW_DISEASE_ENTER_DESCRIPTION           1
 #define NEW_DISEASE_COPY_DESCRIPTION            2
@@ -77,20 +74,17 @@ void getArgumentsFromString(char *bufferedString,
                             int operationCode,
                             int *integerArgument,
                             char **stringArgument1,
-                            char **stringArgument2,
-                            char **stringArgument3) {
+                            char **stringArgument2) {
     char **dummyPointer = NULL;
     switch (operationCode) {
         case NEW_DISEASE_ENTER_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument3 = bufferedString;
+            *stringArgument2 = bufferedString;
             *integerArgument = -1;
             break;
         case NEW_DISEASE_COPY_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
             *stringArgument2 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument3 = NULL;
             *integerArgument = -1;
             break;
         case CHANGE_DESCRIPTION:
@@ -99,21 +93,17 @@ void getArgumentsFromString(char *bufferedString,
                     (int) strtol(getSingleArgumentFromString(&bufferedString),
                                  dummyPointer,
                                  INTEGER_FROM_STRING_BASE);
-            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument3 = bufferedString;
+            *stringArgument2 = bufferedString;
             break;
         case PRINT_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
             *integerArgument = (int) strtol(bufferedString,
                                             dummyPointer,
                                             INTEGER_FROM_STRING_BASE);
-            *stringArgument2 = NULL;
-            *stringArgument3 = NULL;
             break;
         case DELETE_PATIENT_DATA:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
             *stringArgument2 = NULL;
-            *stringArgument3 = NULL;
             *integerArgument = -1;
             break;
         case WRONG_INPUT:
@@ -125,8 +115,7 @@ void getArgumentsFromString(char *bufferedString,
 
 int readSingleLineAndReturnOperationCode(int *integerArgument,
                                          char **stringArgument1,
-                                         char **stringArgument2,
-                                         char **stringArgument3) {
+                                         char **stringArgument2) {
     char *lineReadArrayPointer = NULL;
     char lineRead[MAX_LINE_SIZE];
     char *bufferedString = malloc(MAX_LINE_SIZE * sizeof(char));
@@ -148,8 +137,7 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
                                operationCode,
                                integerArgument,
                                stringArgument1,
-                               stringArgument2,
-                               stringArgument3);
+                               stringArgument2);
     }
 
     return operationCode;

@@ -12,7 +12,6 @@ int main (int argc, char **argv) {
     int integerArgument;
     char *stringArgument1 = NULL;
     char *stringArgument2 = NULL;
-    char *stringArgument3 = NULL;
     bool debugMode = false;
 
     // Checks if program was executed in debug mode.
@@ -27,13 +26,11 @@ int main (int argc, char **argv) {
     do {
         operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
                                                              &stringArgument1,
-                                                             &stringArgument2,
-                                                             &stringArgument3);
+                                                             &stringArgument2);
         performOperation(operationCode,
                          &integerArgument,
                          &stringArgument1,
-                         &stringArgument2,
-                         &stringArgument3);
+                         &stringArgument2);
 
         if (debugMode) {
             debugModePrintDescriptions();
