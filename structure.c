@@ -42,6 +42,8 @@ void decreaseCountAndDeleteIfNotReferred(diseaseStructure *diseaseReference) {
     diseaseReference->referenceCount--;
 
     if (diseaseReference->referenceCount == 0) {
+        free(diseaseReference->diseaseDescription);
+        diseaseReference->diseaseDescription = NULL;
         free(diseaseReference);
         diseaseReference = NULL;
         hospitalGlobalData.storedDiseasesCount--;
