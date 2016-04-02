@@ -25,9 +25,10 @@ struct diseaseListNode {
 
 struct patient {
     char *patientName;
-    diseaseListNode *diseaseList;
+    diseaseListNode *diseaseListHead;
+    diseaseListNode *diseaseListLast;
     patient *nextPatient;
-    int diseaseCount;
+    int diseaseCount; // NOT NEEDED
 };
 
 static hospitalData hospitalGlobalData;
@@ -36,6 +37,10 @@ void initializeHospitalGlobalData(void) {
     // Initialize global structure with dummy ahead list.
     hospitalGlobalData.firstPatient = malloc(sizeof(patient));
     hospitalGlobalData.storedDiseasesCount = 0;
+}
+
+void printIgnoredUponFailure(void) {
+    printf("IGNORED\n");
 }
 
 void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference) {
@@ -51,10 +56,10 @@ void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference) {
 }
 
 void clearPatientData(patient *patientBeingRemoved) {
-    diseaseListNode *diseaseListBeingRemoved = patientBeingRemoved->diseaseList;
+    diseaseListNode *diseaseListBeingRemoved = patientBeingRemoved->diseaseListHead;
     diseaseListNode *temporaryDiseaseList;
 
-    // Frees diseaseStructure from patient's diseaseList one by one.
+    // Frees diseaseStructure from patient's diseaseListHead one by one.
     while (diseaseListBeingRemoved != NULL) {
         temporaryDiseaseList = diseaseListBeingRemoved;
         decreaseCountAndFreeIfNotReferenced(diseaseListBeingRemoved->diseaseReference);
@@ -81,7 +86,7 @@ patient* findPatientPrecedingGivenName(char *patientName) {
 
     // Find patient
     while (currentPatient->nextPatient != NULL &&
-           strcmp(currentPatient->nextPatient->patientName, patientName) < 0) {
+           strcmp(currentPatient->nextPatient->patientName, patientName) != 0) {
         // Lazy evaluation.
         currentPatient = currentPatient->nextPatient;
     }
@@ -89,20 +94,21 @@ patient* findPatientPrecedingGivenName(char *patientName) {
     return currentPatient;
 }
 
-patient* getPatientPointer(char *patientName,
-                           patient *currentPatient) {
+patient* getPatientPointerAllocateIfNull(char *patientName,
+                                         patient *currentPatient) {
     // Checks if we are at the end of the list or proceeding patient's
     // patientName is greater (in lexicographical order).
     // If so allocates and initializes newPatient.
     if (currentPatient->nextPatient == NULL || // Lazy evaluation.
-            strcmp(currentPatient->nextPatient->patientName, patientName) > 0) {
+            strcmp(currentPatient->nextPatient->patientName, patientName) != 0) {
         patient *newPatient = malloc(sizeof(patient));
 
         newPatient->patientName = patientName;
-        // Initializes dummy ahead diseaseList.
-        newPatient->diseaseList = malloc(sizeof(diseaseListNode));
+        // Initializes dummy ahead diseaseListHead.
+        newPatient->diseaseListHead = malloc(sizeof(diseaseListNode));
+        newPatient->diseaseListLast = newPatient->diseaseListHead;
         newPatient->nextPatient = NULL;
-        newPatient->diseaseCount = 0;
+        newPatient->diseaseCount = 0; // NOT NEEDED
         newPatient->nextPatient = currentPatient->nextPatient;
         currentPatient->nextPatient = newPatient;
     }
@@ -111,24 +117,7 @@ patient* getPatientPointer(char *patientName,
     return currentPatient->nextPatient;
 }
 
-diseaseListNode* findDiseasePrecedingGivenDisease(char *diseaseName,
-                                                  diseaseListNode
-                                                  *diseaseList) {
-    diseaseListNode *currentDisease = diseaseList;
-
-    // Finds disease in diseaseList that's
-    // diseaseName field proceeds argument diseaseName.
-    while (currentDisease->nextDisease != NULL &&
-           strcmp(currentDisease->nextDisease->diseaseReference->diseaseName,
-                  diseaseName) < 00) { // Lazy evaluation.
-        currentDisease = currentDisease->nextDisease;
-    }
-
-    return currentDisease;
-}
-
 void createDiseaseRegistry(patient* currentPatient,
-                           diseaseListNode* precedingDisease,
                            char *diseaseName,
                            char *diseaseDescription) {
     // Allocates memory for diseaseListNode and diseaseStructure.
@@ -136,8 +125,8 @@ void createDiseaseRegistry(patient* currentPatient,
     diseaseStructure *newDisease = malloc(sizeof(diseaseStructure));
 
     // Initializes diseaseListNode with arguments passed to the function.
-    newDiseaseNode->nextDisease = precedingDisease->nextDisease;
-    precedingDisease->nextDisease = newDiseaseNode;
+    newDiseaseNode->nextDisease = currentPatient->diseaseListLast->nextDisease;
+    currentPatient->diseaseListLast->nextDisease = newDiseaseNode;
     newDiseaseNode->diseaseReference = newDisease;
 
     // Initializes diseaseStructure with arguments passed to the function.
@@ -146,42 +135,49 @@ void createDiseaseRegistry(patient* currentPatient,
     newDisease->referenceCount = 1;
 
     // Updates currentPatient and global hospitalGlobalData structures.
-    currentPatient->diseaseCount += 1;
-    hospitalGlobalData.storedDiseasesCount += 1;
+    currentPatient->diseaseCount++; // NOT NEEDED
+    hospitalGlobalData.storedDiseasesCount++;
 }
 
 void addNewDisease(char *patientName,
                    char *diseaseName,
                    char *diseaseDescription) {
-    // We want to sort our patients by their patientName field in
-    // lexicographical, ascending order.
+    patient* currentPatient = NULL;
+    // We are inserting patients into our list without any order because it
+    // does not change our time complexity.
 
     // Finds patient with patientName field preceding patientName given as
-    // argument.
+    // argument. If patient with patientName does not exist in the database
+    // then pointer to the last patient on the list is given.
     patient *precedingPatient = findPatientPrecedingGivenName(patientName);
 
     // Gets pointer to patient with patientName same as given argument
     // (allocates and initializes new structure if patient doesn't exists).
-    precedingPatient = getPatientPointer(patientName, precedingPatient);
+    currentPatient = getPatientPointerAllocateIfNull(patientName,
+                                                     precedingPatient);
 
-    // We also want to sort our diseases on diseaseList in lexicographical,
-    // ascending order.
-
-    // Finds disease with diseaseName preceding diseaseName given as argument.
-    diseaseListNode *precedingDisease =
-            findDiseasePrecedingGivenDisease(diseaseName,
-                                             precedingPatient->diseaseList);
-
-    // Allocates and initializes new structure for disease.
-    createDiseaseRegistry(precedingPatient,
-                          precedingDisease,
+    // Allocates and initializes new structure for disease and inserts that
+    // disease at the end of patient diseaseList.
+    createDiseaseRegistry(currentPatient,
                           diseaseName,
                           diseaseDescription);
 }
 
 void copyLatestDisease(char *toPatientName,
                        char *fromPatientName) {
-    // I assume that if
+    patient *fromPatient = NULL;
+//    diseaseStructure *diseaseCopied = NULL;
+
+    fromPatient = findPatientPrecedingGivenName(fromPatientName);
+    fromPatient = fromPatient->nextPatient;
+    if (fromPatient == NULL ||
+            fromPatient->diseaseListHead == fromPatient->diseaseListLast) {
+        printIgnoredUponFailure();
+        free(fromPatient);
+        free(toPatientName);
+    } else {
+
+    }
 }
 
 void changePatientDiseaseDescription(char *patientName,
@@ -194,10 +190,6 @@ void changePatientDiseaseDescription(char *patientName,
 void printDiseaseDescription(char *patientName,
                               int diseaseID) {
 
-}
-
-void printIgnoredUponFailure(void) {
-    printf("IGNORED\n");
 }
 
 void deletePatientDiseaseData(char *patientName) {
@@ -236,7 +228,11 @@ void performOperation(int operationCode,
             break;
         case 0:
         default:
-            printIgnoredUponFailure();// There is no default.
-            break;
+            printIgnoredUponFailure();
     }
+}
+
+void debugModePrintDescriptions() {
+    fprintf(stderr, "DESCRIPTIONS: %d\n", hospitalGlobalData
+            .storedDiseasesCount);
 }

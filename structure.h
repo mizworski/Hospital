@@ -20,12 +20,14 @@ struct diseaseListNode {
 
 struct patient {
     char *patientName;
-    diseaseListNode *diseaseList;
+    diseaseListNode *diseaseListHead;
     patient *nextPatient;
     int diseaseCount;
 };
 
 void initializeHospitalGlobalData(void);
+
+void printIgnoredUponFailure(void);
 
 void decreaseCountAndFreeIfNotReferenced(diseaseStructure *diseaseReference);
 
@@ -35,15 +37,10 @@ void clearAllocatedMemory(void);
 
 patient* findPatientPrecedingGivenName(char *patientName);
 
-patient* getPatientPointer(char *patientName,
-                           patient *currentPatient);
-
-diseaseListNode* findDiseasePrecedingGivenDisease(char *diseaseName,
-                                                  diseaseListNode
-                                                  *diseaseList);
+patient* getPatientPointerAllocateIfNull(char *patientName,
+                                         patient *currentPatient);
 
 void createDiseaseRegistry(patient* currentPatient,
-                           diseaseListNode* precedingDisease,
                            char *diseaseName,
                            char *diseaseDescription);
 
@@ -62,8 +59,6 @@ void changePatientDiseaseDescription(char *patientName,
 void printDiseaseDescription (char *patientName,
                               int diseaseID);
 
-void printIgnoredUponFailure(void);
-
 void deletePatientDiseaseData (char *patientName);
 
 void performOperation(int operationCode,
@@ -71,4 +66,6 @@ void performOperation(int operationCode,
                       char **stringArgument1,
                       char **stringArgument2,
                       char **stringArgument3);
+
+void debugModePrintDescriptions();
 
