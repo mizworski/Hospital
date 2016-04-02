@@ -21,6 +21,10 @@ hospitalData hospitalGlobalData;
 void initializeHospitalGlobalData(void) {
     // Initialize global structure with dummy ahead list.
     hospitalGlobalData.firstPatient = malloc(sizeof(patient));
+    hospitalGlobalData.firstPatient->diseaseListLast= NULL;
+    hospitalGlobalData.firstPatient->diseaseListHead = NULL;
+    hospitalGlobalData.firstPatient->nextPatient = NULL;
+    hospitalGlobalData.firstPatient->patientName = NULL;
     hospitalGlobalData.storedDiseasesCount = 0;
 }
 
@@ -300,13 +304,19 @@ void deletePatientDiseaseList(patient *currentPatient) {
 void deletePatientData(patient *patientBeingRemoved) {
     deletePatientDiseaseList(patientBeingRemoved);
     // Frees dummy from head of the list.
-    free(patientBeingRemoved->diseaseListHead);
-    patientBeingRemoved->diseaseListHead = NULL;
-    patientBeingRemoved->diseaseListLast = NULL;
-    free(patientBeingRemoved->patientName);
-    patientBeingRemoved->patientName = NULL;
-    free(patientBeingRemoved);
-    patientBeingRemoved = NULL;
+    if (patientBeingRemoved != NULL) {
+        if (patientBeingRemoved->diseaseListHead != NULL) {
+            free(patientBeingRemoved->diseaseListHead);
+            patientBeingRemoved->diseaseListHead = NULL;
+            patientBeingRemoved->diseaseListLast = NULL;
+        }
+        if (patientBeingRemoved->patientName != NULL) {
+            free(patientBeingRemoved->patientName);
+            patientBeingRemoved->patientName = NULL;
+        }
+        free(patientBeingRemoved);
+        patientBeingRemoved = NULL;
+    }
 }
 
 void deletePatientDiseaseData(char *patientName) {

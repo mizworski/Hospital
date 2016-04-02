@@ -4,7 +4,7 @@
 #include "parse.h"
 #include "structure.h"
 
-#define DEBUG_MODE          "-v"
+#define DEBUG_MODE  "-v"
 
 int main (int argc, char **argv) {
     int operationCode;

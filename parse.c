@@ -137,16 +137,33 @@ void getArgumentsFromString(char *bufferedString,
     }
 }
 
+int getReadLineLenght(char *lineRead) {
+    int charCount = 0;
+
+    while (lineRead[charCount] != '\n' && charCount < MAX_LINE_SIZE) {
+        charCount++;
+    }
+
+    return charCount;
+}
+
 int readSingleLineAndReturnOperationCode(int *integerArgument,
                                          char **stringArgument1,
                                          char **stringArgument2) {
     char *lineReadArrayPointer = NULL;
     char lineRead[MAX_LINE_SIZE];
-    char *bufferedString = malloc(MAX_LINE_SIZE * sizeof(char));
+    char *bufferedString = NULL;
     char *bufferStartingPoint = bufferedString;
     int operationCode;
+    int readLineLength;
 
     lineReadArrayPointer = fgets(lineRead, MAX_LINE_SIZE, stdin);
+
+    if (lineReadArrayPointer != NULL) {
+        readLineLength = getReadLineLenght(lineRead);
+        bufferedString = malloc(readLineLength * sizeof(char));
+        bufferStartingPoint = bufferedString;
+    }
 
     if (lineReadArrayPointer == NULL) {
         operationCode = LINE_WAS_NOT_READ;
