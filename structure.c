@@ -4,8 +4,6 @@
 #define IGNORE_MESSAGE          "IGNORED\n"
 #define DESCRIPTION_MESSAGE     "DESCRIPTIONS: %d\n"
 
-// TODO SET NULL AFTER FREEING
-
 typedef struct hospitalData hospitalData;
 typedef struct patient patient;
 typedef struct diseaseStructure diseaseStructure;

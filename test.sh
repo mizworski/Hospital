@@ -11,43 +11,53 @@ else
     testFilesDir=$2
 fi
 
-echo "Testing program $programName files in $testFilesDir/"
-
-testID=1
+echo "TESTING PROGRAM: $programName WITH TEST FILES IN DIR: $testFilesDir/"
+if [[ ${debugMode} == 1 ]]
+then
+    echo "IN DEBUG MODE."
+else
+    echo "."
+fi
+failures=0
 
 if [[ ${debugMode} == 0 ]]
 then
     for input in ${testFilesDir}/*.in; do
-        echo "${input%.*}"
-        ./${programName%.*} < ${input} 1> temp.out
-        diff -q "${input%.*}.out" temp.out 1>/dev/null
-        if [[ $? == "0" ]]
-        then
-            echo "Test ${testID} passed."
-        else
-            echo "Test ${testID} did not pass."
-        fi
-        ((testID++))
-    done
-else
-    for input in ${testFilesDir}/*.in; do
-        echo "${input%.*}"
-        ./${programName%.*} -v < ${input} > temp_stdout.out 2>temp_stderr.out
+        echo "TESTING: ${input%.*}..."
+        ./${programName%.*} < ${input} 1> temp_stdout.out
         diff -q "${input%.*}.out" temp_stdout.out 1>/dev/null
         if [[ $? == "0" ]]
         then
-            echo "Stdout test ${testID} passed."
+            echo "STANDARD   OUT: SUCCESS"
         else
-            echo "Stdout test ${testID} did not pass."
+            echo "STANDARD   OUT: FAILURE"
+            ((failures++))
+        fi
+    done
+    rm temp_stdout.out
+else
+    for input in ${testFilesDir}/*.in; do
+        echo "TESTING ${input%.*}..."
+        ./${programName%.*}.dbg -v < ${input} > temp_stdout.out 2>temp_stderr.out
+        diff -q "${input%.*}.out" temp_stdout.out 1>/dev/null
+        if [[ $? == "0" ]]
+        then
+            echo "STANDARD   OUT: SUCCESS"
+        else
+            echo "STANDARD   OUT: FAILURE"
+            ((failures++))
         fi
         diff -q "${input%.*}.err" temp_stderr.out 1>/dev/null
         if [[ $? == "0" ]]
         then
-            echo "Stderr test ${testID} passed."
+            echo "DIAGNOSTIC OUT: SUCCESS"
         else
-            echo "Stderr test ${testID} did not pass."
+            echo "DIAGNOSTIC OUT: FAILURE"
+            ((failures++))
         fi
-
-        ((testID++))
     done
+    rm temp_stdout.out
+    rm temp_stderr.out
 fi
+
+echo "TESTS FAILED: ${failures}"
