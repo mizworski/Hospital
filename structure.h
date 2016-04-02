@@ -1,3 +1,6 @@
+#ifndef STRUCTURE_H
+#define STRUCTURE_H
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -74,3 +77,5 @@ void performOperation(int operationCode,
                       int *integerArgument,
                       char **stringArgument1,
                       char **stringArgument2);
+
+#endif /* STRUCTURE_H */

@@ -1,3 +1,6 @@
+#ifndef PARSE_H
+#define PARSE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,3 +20,4 @@ void getArgumentsFromString(char *bufferedString,
 int readSingleLineAndReturnOperationCode (int *integerArgument,
                                           char **stringArgument1,
                                           char **stringArgument2);
+#endif /* PARSE_H */
