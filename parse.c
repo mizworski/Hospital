@@ -100,7 +100,7 @@ void getArgumentsFromString(char *bufferedString,
             break;
         case NEW_DISEASE_COPY_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
-            *stringArgument2 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument2 = getStringTillEndLine(&bufferedString);
             *integerArgument = -1;
             break;
         case CHANGE_DESCRIPTION:
@@ -118,7 +118,7 @@ void getArgumentsFromString(char *bufferedString,
                                             INTEGER_FROM_STRING_BASE);
             break;
         case DELETE_PATIENT_DATA:
-            *stringArgument1 = getSingleArgumentFromString(&bufferedString);
+            *stringArgument1 = getStringTillEndLine(&bufferedString);
             *stringArgument2 = NULL;
             *integerArgument = -1;
             break;
