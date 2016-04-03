@@ -18,6 +18,7 @@ then
 else
     echo "."
 fi
+
 failures=0
 
 if [[ ${debugMode} == 0 ]]

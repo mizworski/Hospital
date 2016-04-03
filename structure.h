@@ -69,7 +69,7 @@ void deletePatientDiseaseList(patient *currentPatient);
 
 void deletePatientData(patient *patientBeingRemoved);
 
-void deletePatientDiseaseData (char *patientName);
+void deletePatientNameDiseaseList(char *patientName);
 
 void freeAllocatedMemory(void);
 

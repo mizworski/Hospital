@@ -185,6 +185,11 @@ void copyLatestDisease(char *toPatientName,
         free(toPatientName);
         toPatientName = NULL;
     } else {
+        // If patient that we want to copy disease from exists and his
+        // disease list is not empty then we are sure, that we will add
+        // disease to patient for sure.
+        // In order to do that we get pointer to toPatient and then add it
+        // after last disease on this list.
         patientPrecedingToPatient = findPatientPrecedingGivenName(toPatientName);
         toPatient = getPatientPointerAllocateIfNull(toPatientName,
                                                     patientPrecedingToPatient);
@@ -196,11 +201,14 @@ void copyLatestDisease(char *toPatientName,
         printOKUponSuccess();
     }
 
+    // fromPatientName is not needed anymore and should be freed.
+    // toPatient is freed only if patient with toPatientName existed already
+    // in database, and if that occurred, string was freed in
+    // getPatientPointer... function.
     free(fromPatientName);
     fromPatientName = NULL;
 }
 
-// Returns NULL when diseaseListNode was not found.
 diseaseListNode* findDiseaseListNode (patient *currentPatient,
                                       int diseaseID) {
     diseaseListNode* diseaseListNodeToReturn = NULL;
@@ -208,15 +216,20 @@ diseaseListNode* findDiseaseListNode (patient *currentPatient,
 
     int diseaseCount;
 
+    // Searches for disease that is diseaseID'th on the patient diseaseList
+    // or breaks when list has ended.
     for (diseaseCount = 0; diseaseCount < diseaseID &&
             currentDiseaseListNode != NULL; diseaseCount++) {
         currentDiseaseListNode = currentDiseaseListNode->nextDisease;
     }
 
+    // Checks which condition broke loop.
     if (diseaseCount == diseaseID) {
         diseaseListNodeToReturn = currentDiseaseListNode;
     }
 
+    // Returns list node that keeps diseaseID'th disease or null if failed to
+    // find that (number of diseases on the list is less than diseaseID).
     return diseaseListNodeToReturn;
 }
 
@@ -243,11 +256,13 @@ void changePatientDiseaseDescription(char *patientName,
         diseaseListNodeToModify = findDiseaseListNode(currentPatient,
                                                       diseaseID);
         if (diseaseListNodeToModify == NULL) {
+            // Disease was not found on the disease list.
             printIgnoredUponFailure();
             free(diseaseDescription);
             diseaseDescription = NULL;
         } else {
             diseaseToModify = diseaseListNodeToModify->diseaseReference;
+            // Dereferences previous disease and allocates new one.
             decreaseCountAndDeleteIfNotReferred(diseaseToModify);
             newDisease = createNewDiseaseStructure(diseaseDescription);
             diseaseListNodeToModify->diseaseReference = newDisease;
@@ -277,6 +292,7 @@ void printDiseaseDescription(char *patientName,
         diseaseNodeToPrint = findDiseaseListNode(currentPatient,
                                                  diseaseID);
         if (diseaseNodeToPrint == NULL) {
+            // Disease was not found on the list.
             printIgnoredUponFailure();
         } else {
             printf("%s\n",
@@ -288,6 +304,7 @@ void printDiseaseDescription(char *patientName,
     patientName = NULL;
 }
 
+// Deletes patientDiseaseList but keeps dummy ahead that list.
 void deletePatientDiseaseList(patient *currentPatient) {
     if (currentPatient->diseaseListHead != NULL) {
         diseaseListNode *nextDiseaseListNodeToRemove =
@@ -311,6 +328,7 @@ void deletePatientDiseaseList(patient *currentPatient) {
     }
 }
 
+// Deletes patient and frees everything stored in structure.
 void deletePatientData(patient *patientBeingRemoved) {
     deletePatientDiseaseList(patientBeingRemoved);
     // Frees dummy from head of the list.
@@ -329,7 +347,9 @@ void deletePatientData(patient *patientBeingRemoved) {
     }
 }
 
-void deletePatientDiseaseData(char *patientName) {
+// Function that deletes patient's patientDiseaseList that's patientName is
+// given as argument. One of operations defined in specifications.
+void deletePatientNameDiseaseList(char *patientName) {
     patient *currentPatient = NULL;
     patient *patientPrecedingCurrentPatient = NULL;
 
@@ -359,6 +379,7 @@ void freeAllocatedMemory(void) {
     }
 }
 
+// Function executed in hospital.c which operation code and arguments.
 void performOperation(int operationCode,
                       int *integerArgument,
                       char *stringArgument1,
@@ -384,7 +405,7 @@ void performOperation(int operationCode,
                                     *integerArgument);
             break;
         case 5:
-            deletePatientDiseaseData(stringArgument1);
+            deletePatientNameDiseaseList(stringArgument1);
             break;
         case 0:
         default:
