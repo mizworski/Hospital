@@ -12,18 +12,13 @@ else
 fi
 
 echo "TESTING PROGRAM: $programName WITH TEST FILES IN DIR: $testFilesDir/"
-if [[ ${debugMode} == 1 ]]
-then
-    echo "IN DEBUG MODE."
-else
-    echo "."
-fi
 
 failures=0
 
 if [[ ${debugMode} == 0 ]]
 then
     for input in ${testFilesDir}/*.in; do
+        echo ""
         echo "TESTING: ${input%.*}..."
         ./${programName%.*} < ${input} 1> temp_stdout.out
         diff -q "${input%.*}.out" temp_stdout.out 1>/dev/null
@@ -38,6 +33,7 @@ then
     rm temp_stdout.out
 else
     for input in ${testFilesDir}/*.in; do
+        echo ""
         echo "TESTING ${input%.*}..."
         ./${programName%.*}.dbg -v < ${input} > temp_stdout.out 2>temp_stderr.out
         diff -q "${input%.*}.out" temp_stdout.out 1>/dev/null

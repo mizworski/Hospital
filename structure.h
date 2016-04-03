@@ -2,8 +2,8 @@
 #define STRUCTURE_H
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct patient patient;
 typedef struct diseaseStructure diseaseStructure;

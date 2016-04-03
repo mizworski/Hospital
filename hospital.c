@@ -1,10 +1,10 @@
 #include <stdbool.h>
-#include <string.h>
 
 #include "parse.h"
 #include "structure.h"
 
-#define DEBUG_MODE  "-v"
+#define DEBUG_MODE              "-v"
+#define WRONG_INPUT_MESSAGE     "ERROR\n"
 
 int main (int argc, char **argv) {
     int operationCode;
@@ -14,9 +14,13 @@ int main (int argc, char **argv) {
     bool debugMode = false;
 
     // Checks if program was executed in debug mode.
-    for(int i = 0; i < argc; i++) {
+    for(int i = 1; i < argc; i++) {
         if (strcmp(DEBUG_MODE, argv[i]) == 0) {
             debugMode = true;
+        } else {
+            // Wrong argument was read. Exits program with 1.
+            printf(WRONG_INPUT_MESSAGE);
+            return 1;
         }
     }
 

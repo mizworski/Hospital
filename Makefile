@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS=-Wall -Werror
+CFLAGS=-Wall -Werror -std=c99
 SRCS=hospital.c parse.c structure.c
 OBJS=$(SRCS:.c=.o)
 DBG=$(SRCS:.c=_dbg.o)
