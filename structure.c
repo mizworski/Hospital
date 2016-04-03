@@ -182,6 +182,8 @@ void copyLatestDisease(char *toPatientName,
         // If diseaseListHead equals diseaseListLast then our list of
         // diseases is empty (we keep dummy ahead that list).
         printIgnoredUponFailure();
+        // toPatientName is no longer needed because we are not adding new
+        // patient.
         free(toPatientName);
         toPatientName = NULL;
     } else {
@@ -209,8 +211,8 @@ void copyLatestDisease(char *toPatientName,
     fromPatientName = NULL;
 }
 
-diseaseListNode* findDiseaseListNode (patient *currentPatient,
-                                      int diseaseID) {
+diseaseListNode* findDiseaseListNode(patient *currentPatient,
+                                     int diseaseID) {
     diseaseListNode* diseaseListNodeToReturn = NULL;
     diseaseListNode* currentDiseaseListNode = currentPatient->diseaseListHead;
 
@@ -250,6 +252,7 @@ void changePatientDiseaseDescription(char *patientName,
         // Patient was not found in database or
         // tried referring to disease with wrong ID.
         printIgnoredUponFailure();
+        // No disease is changed, diseaseDescription can be freed.
         free(diseaseDescription);
         diseaseDescription = NULL;
     } else {
@@ -258,6 +261,7 @@ void changePatientDiseaseDescription(char *patientName,
         if (diseaseListNodeToModify == NULL) {
             // Disease was not found on the disease list.
             printIgnoredUponFailure();
+            // No disease is changed, diseaseDescription can be freed.
             free(diseaseDescription);
             diseaseDescription = NULL;
         } else {
@@ -270,12 +274,13 @@ void changePatientDiseaseDescription(char *patientName,
         }
     }
 
+    // patientName is no longer needed because we are not adding new patient.
     free(patientName);
     patientName = NULL;
 }
 
 void printDiseaseDescription(char *patientName,
-                              int diseaseID) {
+                             int diseaseID) {
     patient *currentPatient = NULL;
     patient *patientPrecedingCurrentPatient = NULL;
 
@@ -300,6 +305,7 @@ void printDiseaseDescription(char *patientName,
         }
     }
 
+    // patientName is no longer needed because we are not adding new patient.
     free(patientName);
     patientName = NULL;
 }
@@ -319,6 +325,7 @@ void deletePatientDiseaseList(patient *currentPatient) {
             temporaryDiseaseListNode->diseaseReference = NULL;
             nextDiseaseListNodeToRemove = nextDiseaseListNodeToRemove->nextDisease;
             temporaryDiseaseListNode->nextDisease = NULL;
+            // temporaryDiseaseListNode is never null.
             free(temporaryDiseaseListNode);
             temporaryDiseaseListNode = NULL;
         }
@@ -331,17 +338,19 @@ void deletePatientDiseaseList(patient *currentPatient) {
 // Deletes patient and frees everything stored in structure.
 void deletePatientData(patient *patientBeingRemoved) {
     deletePatientDiseaseList(patientBeingRemoved);
-    // Frees dummy from head of the list.
     if (patientBeingRemoved != NULL) {
+        // Frees dummy from head of the list.
         if (patientBeingRemoved->diseaseListHead != NULL) {
             free(patientBeingRemoved->diseaseListHead);
             patientBeingRemoved->diseaseListHead = NULL;
             patientBeingRemoved->diseaseListLast = NULL;
         }
+        // Frees patientName.
         if (patientBeingRemoved->patientName != NULL) {
             free(patientBeingRemoved->patientName);
             patientBeingRemoved->patientName = NULL;
         }
+        // Frees structure.
         free(patientBeingRemoved);
         patientBeingRemoved = NULL;
     }
@@ -364,6 +373,7 @@ void deletePatientNameDiseaseList(char *patientName) {
         printOKUponSuccess();
     }
 
+    // patientName is no longer needed because we are not adding new patient.
     free(patientName);
     patientName = NULL;
 }
@@ -372,6 +382,8 @@ void freeAllocatedMemory(void) {
     // Frees list of patients from global structure.
     patient *nextPatientToRemove = hospitalGlobalData.firstPatient;
     patient *temporaryPatient = NULL;
+
+    // Deletes patients one by one.
     while (nextPatientToRemove != NULL) {
         temporaryPatient = nextPatientToRemove;
         nextPatientToRemove = nextPatientToRemove->nextPatient;
