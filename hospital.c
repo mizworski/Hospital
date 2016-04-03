@@ -20,13 +20,15 @@ int main (int argc, char **argv) {
         }
     }
 
+    // Initializes global structure where patients list and descriptions
+    // count is stored.
     initializeHospitalGlobalData();
 
+    // Reads line for the first time.
     operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
                                                          &stringArgument1,
                                                          &stringArgument2);
-    /*int i = 0; // dsdsdsd*/
-    while (operationCode != LINE_WAS_NOT_READ /*&& i < 10*/) { // dsdsds
+    while (operationCode != LINE_WAS_NOT_READ ) {
         performOperation(operationCode,
                          &integerArgument,
                          stringArgument1,
@@ -39,10 +41,10 @@ int main (int argc, char **argv) {
         operationCode = readSingleLineAndReturnOperationCode(&integerArgument,
                                                              &stringArgument1,
                                                              &stringArgument2);
-        /*i++; // DASDAD*/
     }
 
-    clearAllocatedMemory();
+    // Frees memory that was used during program runtime.
+    freeAllocatedMemory();
 
     return 0;
 }

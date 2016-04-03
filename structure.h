@@ -71,7 +71,7 @@ void deletePatientData(patient *patientBeingRemoved);
 
 void deletePatientDiseaseData (char *patientName);
 
-void clearAllocatedMemory(void);
+void freeAllocatedMemory(void);
 
 void performOperation(int operationCode,
                       int *integerArgument,

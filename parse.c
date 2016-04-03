@@ -19,12 +19,17 @@ int getOperationCode(char *operationString, size_t *charsShiftInString) {
     int operationCode;
     int charCount = 0;
 
-    while (operationString[charCount] != ' ' && operationString[charCount] != '\n') {
+    // Finds first char in operationString that is space or new line.
+    while (operationString[charCount] != ' ' &&
+           operationString[charCount] != '\n') {
         charCount++;
     }
 
+    // Number or chars skipped in loop.
     *charsShiftInString = (size_t) charCount;
 
+    // Compares lengths of operations defined in specification and operations
+    // string itself with first charsShiftInString chars of operationString
     if (*charsShiftInString == NEW_DISEASE_ENTER_DESCRIPTION_LENGTH &&
         (strncmp(operationString, "NEW_DISEASE_ENTER_DESCRIPTION", *charsShiftInString) == 0)) {
         operationCode = NEW_DISEASE_ENTER_DESCRIPTION;
@@ -44,9 +49,10 @@ int getOperationCode(char *operationString, size_t *charsShiftInString) {
         operationCode = WRONG_INPUT;
     }
 
-    // Adds one to get position of first char.
+    // Adds one to get position of first char after operation.
     (*charsShiftInString)++;
 
+    // Identifies which procedure was called.
     return operationCode;
 }
 
@@ -54,22 +60,28 @@ char* getSingleArgumentFromString(char **bufferedString) {
     int charCount = 0;
     char *argumentFromString = NULL;
 
+    // Counts chars in single word read from bufferedString.
     while ((*bufferedString)[charCount] != ' ' &&
            (*bufferedString)[charCount] != '\0') {
         charCount++;
     }
 
+    // Allocates memory for new string with length of charCount + 1
+    // (for \0 char at the end of the string).
+    // Then copies string from bufferedString and set last char as '\0'.
     argumentFromString = malloc((charCount + 1) * sizeof(char));
-
     strncpy(argumentFromString, *bufferedString, (size_t) charCount);
     argumentFromString[charCount] = '\0';
 
-    // Adds one to skip whitespace.
+    // Adds one to skip whitespace in bufferedString.
     *bufferedString += charCount + 1;
 
+    // Returns string that is requested argument.
     return argumentFromString;
 }
 
+// Does almost the same in exception of that it does not read to the first
+// whitespace but instead to the '\n' and then sets last char of string as '\0'.
 char* getStringTillEndLine(char **bufferedString) {
     int charCount = 0;
     char *argumentFromString = NULL;
@@ -91,9 +103,14 @@ void getArgumentsFromString(char *bufferedString,
                             int *integerArgument,
                             char **stringArgument1,
                             char **stringArgument2) {
+    // Dummy pointer required for strtol() function call but was not used.
     char **dummyPointer = NULL;
+    // Integer buffer is used to keep string that was read from
+    // bufferedString in order to free it afterwards.
     char *integerBuffer = NULL;
 
+    // Gets arguments from bufferedString and then sets arguments values
+    // given to the function.
     switch (operationCode) {
         case NEW_DISEASE_ENTER_DESCRIPTION:
             *stringArgument1 = getSingleArgumentFromString(&bufferedString);
@@ -137,7 +154,8 @@ void getArgumentsFromString(char *bufferedString,
     }
 }
 
-int getReadLineLenght(char *lineRead) {
+// Value needed to optimise allocation of bufferedString.
+int getReadLineLength(char *lineRead) {
     int charCount = 0;
 
     while (lineRead[charCount] != '\n' && charCount < MAX_LINE_SIZE) {
@@ -153,14 +171,17 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
     char *lineReadArrayPointer = NULL;
     char lineRead[MAX_LINE_SIZE];
     char *bufferedString = NULL;
+    // Pointer needed to free firstly allocated bufferedString.
     char *bufferStartingPoint = bufferedString;
     int operationCode;
     int readLineLength;
 
+    // When function fails to read new line it returns null.
     lineReadArrayPointer = fgets(lineRead, MAX_LINE_SIZE, stdin);
 
+    // Allocation of bufferedString
     if (lineReadArrayPointer != NULL) {
-        readLineLength = getReadLineLenght(lineRead);
+        readLineLength = getReadLineLength(lineRead);
         bufferedString = malloc(readLineLength * sizeof(char));
         bufferStartingPoint = bufferedString;
     }
@@ -170,8 +191,13 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
     } else {
         size_t charsShiftInString;
 
+        // Gets operation code of available operations.
         operationCode = getOperationCode(lineRead, &charsShiftInString);
 
+        // Copies lineRead shifted by number of characters, that was used by
+        // procedure call, to bufferedString.
+        // Safe to use because bufferString size is not greater than
+        // MAX_LINE_SIZE
         strcpy(bufferedString, lineReadArrayPointer + charsShiftInString);
 
         getArgumentsFromString(bufferedString,
@@ -181,6 +207,7 @@ int readSingleLineAndReturnOperationCode(int *integerArgument,
                                stringArgument2);
     }
 
+    // Frees buffer that is not needed anymore.
     free(bufferStartingPoint);
 
     return operationCode;

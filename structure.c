@@ -14,16 +14,19 @@ struct hospitalData {
     int storedDiseasesCount;
 };
 
+// Global structure keeps number of descriptions and list of patients.
 hospitalData hospitalGlobalData;
 
 void initializeHospitalGlobalData(void) {
     // Initialize global structure with dummy ahead list.
+    hospitalGlobalData.storedDiseasesCount = 0;
     hospitalGlobalData.firstPatient = malloc(sizeof(patient));
+
+    // Initialize dummy.
     hospitalGlobalData.firstPatient->diseaseListLast= NULL;
     hospitalGlobalData.firstPatient->diseaseListHead = NULL;
     hospitalGlobalData.firstPatient->nextPatient = NULL;
     hospitalGlobalData.firstPatient->patientName = NULL;
-    hospitalGlobalData.storedDiseasesCount = 0;
 }
 
 void printIgnoredUponFailure(void) {
@@ -43,11 +46,15 @@ void debugModePrintDescriptions(void) {
 void decreaseCountAndDeleteIfNotReferred(diseaseStructure *diseaseReference) {
     diseaseReference->referenceCount--;
 
+    // If disease is not referred by anyone then it is freed.
     if (diseaseReference->referenceCount == 0) {
+        // diseaseReference and diseaseReference->diseaseDescription
+        // is never null.
         free(diseaseReference->diseaseDescription);
         diseaseReference->diseaseDescription = NULL;
         free(diseaseReference);
         diseaseReference = NULL;
+        // Decrease global descriptions count.
         hospitalGlobalData.storedDiseasesCount--;
     }
 }
@@ -55,13 +62,15 @@ void decreaseCountAndDeleteIfNotReferred(diseaseStructure *diseaseReference) {
 patient* findPatientPrecedingGivenName(char *patientName) {
     patient *currentPatient = hospitalGlobalData.firstPatient;
 
-    // Find patient
-    while (currentPatient->nextPatient != NULL &&
+    // Finds patient that nextPatient->patientName is either our patient or
+    // null pointer which means patient with patientName was not found in
+    // database.
+    while (currentPatient->nextPatient != NULL && // Lazy evaluation.
            strcmp(currentPatient->nextPatient->patientName, patientName) != 0) {
-        // Lazy evaluation.
         currentPatient = currentPatient->nextPatient;
     }
 
+    // Returns pointer to patient before our patient (or null).
     return currentPatient;
 }
 
@@ -83,11 +92,14 @@ patient* getPatientPointerAllocateIfNull(char *patientName,
         newPatient->nextPatient = currentPatient->nextPatient;
         currentPatient->nextPatient = newPatient;
     } else {
+        // Patient with patientName exists in out database and string
+        // patientName is no longer needed and has to be freed.
         free(patientName);
         patientName = NULL;
     }
 
-    // Now patient next to our currentPatient is our patient.
+    // Returns pointer to patient that patientName is same as our
+    // char *patientName.
     return currentPatient->nextPatient;
 }
 
@@ -336,7 +348,7 @@ void deletePatientDiseaseData(char *patientName) {
     patientName = NULL;
 }
 
-void clearAllocatedMemory(void) {
+void freeAllocatedMemory(void) {
     // Frees list of patients from global structure.
     patient *nextPatientToRemove = hospitalGlobalData.firstPatient;
     patient *temporaryPatient = NULL;
