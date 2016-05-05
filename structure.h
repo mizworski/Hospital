@@ -55,8 +55,8 @@ void addDiseaseToListAfterListNode(diseaseListNode *precedingDiseaseListNode,
 void copyLatestDisease(char *fromPatientName,
                        char *toPatientName);
 
-diseaseListNode* findDiseaseListNode (patient *currentPatient,
-                                      int diseaseID);
+diseaseListNode* findDiseaseListNode(patient *currentPatient,
+                                     int diseaseID);
 
 void changePatientDiseaseDescription(char *patientName,
                                      int diseaseID,

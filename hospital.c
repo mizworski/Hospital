@@ -6,7 +6,7 @@
 #define DEBUG_MODE              "-v"
 #define WRONG_INPUT_MESSAGE     "ERROR\n"
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
     int operationCode;
     int integerArgument;
     char *stringArgument1 = NULL;
